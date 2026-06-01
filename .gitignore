@@ -1,0 +1,62 @@
+# Compiled output
+/dist
+/tmp
+/out-tsc
+/bazel-out
+
+# Node
+/node_modules
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# Angular cache
+/.angular/cache
+/.angular
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+# Miscellaneous
+.sass-cache/
+/connect.lock
+/coverage
+/libpeerconnection.log
+testem.log
+/typings
+__screenshots__/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Capacitor
+/ios/App/Pods
+/ios/App/App.xcworkspace
+android/.gradle
+android/app/build
+android/build
+android/local.properties
+
+# Environment secrets (never commit)
+.env
+.env.local
+.env.*.local
+
+# Playwright
+/test-results
+/playwright-report
