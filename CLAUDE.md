@@ -80,6 +80,58 @@ Tipografía Inter. Radius: rounded-lg inputs/buttons, rounded-xl cards, rounded-
 5. **lucide-angular para iconos**: no SVGs propios salvo el logo.
 6. **ESLint boundaries activas desde el primer commit**.
 
+## Herramientas disponibles en este repo
+
+Tienes acceso a las siguientes herramientas además de las skills globales
+(superpowers, gstack). ÚSALAS PROACTIVAMENTE:
+
+### frontend-design agent
+Cuando vayas a crear componentes con peso visual (cards, dashboards,
+modales, formularios con UX rica), DELEGA al agente frontend-design
+en lugar de generar tú directamente. Razones:
+- Produce UI con criterio de diseño profesional, no estética genérica AI.
+- Conoce buenas prácticas modernas (Tailwind v4, accesibilidad, microinteracciones).
+- Respeta el mockup aprobado (docs/mockup.tsx) como referencia visual.
+
+Cuando lo delegas:
+1. Dale el contexto del componente: qué es, qué props/inputs, qué eventos.
+2. Pásale como referencia obligatoria el mockup (docs/mockup.tsx) y los
+   tokens del design system (sección 8 del blueprint).
+3. Asegúrate que el componente generado:
+   - Es standalone (no NgModule).
+   - Usa signals para estado local.
+   - Usa Tailwind utility-first, no CSS custom.
+   - Usa lucide-angular para iconos.
+   - Respeta las boundaries de capas (ver eslint.config.js).
+
+NO delegues al frontend-design las cosas mecánicas: servicios HTTP en
+data-access, models en shared/domain, interceptors, guards. Esas las
+haces tú directamente con el blueprint como referencia.
+
+### Skills de gstack relevantes
+- `/autoplan` — antes de features con flujos complejos (importación,
+  dashboard interactivo).
+- `/qa` — pruebas manuales contra el dev server.
+- `/review` — code review propio antes de pedir review humana.
+- `/ship` — commit + push + PR.
+
+### Skills de superpowers relevantes
+- `superpowers:test-driven-development` — para servicios y lógica no
+  trivial (interceptors, polling, mapeo de columnas Excel).
+- `superpowers:systematic-debugging` — bugs que no cedan rápido.
+- `superpowers:verification-before-completion` — antes de declarar
+  tarea terminada (`pnpm build && pnpm test && pnpm lint`).
+
+## Prioridad entre fuentes de verdad
+
+Si hay conflicto entre las fuentes:
+1. **Mockup** (docs/mockup.tsx) — máxima autoridad sobre forma visual.
+2. **Blueprint sección 5 y 8** — contratos de API y design system.
+3. **Execution plan** (docs/execution-plan.md) — owner y orden.
+4. **frontend-design / convenciones modernas** — cuando blueprint no
+   se pronuncia.
+5. **Sugerencias propias del modelo** — última prioridad.
+
 ## Reglas No Negociables
 
 Ver sección 19 del blueprint. Las más importantes para frontend:
