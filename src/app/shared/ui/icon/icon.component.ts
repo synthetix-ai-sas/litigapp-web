@@ -1,13 +1,11 @@
 import { Component, input } from '@angular/core';
+import { LucideAngularModule } from 'lucide-angular';
 
-/**
- * Wrapper around lucide-angular icons.
- * Full implementation comes in Step 15.
- */
 @Component({
   selector: 'app-icon',
   standalone: true,
-  template: `<span class="app-icon"></span>`,
+  imports: [LucideAngularModule],
+  template: `<lucide-angular [name]="name()" [size]="size()" [strokeWidth]="1.5" />`,
 })
 export class IconComponent {
   name = input<string>('');
