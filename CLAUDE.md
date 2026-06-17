@@ -79,6 +79,17 @@ Tipografía Inter. Radius: rounded-lg inputs/buttons, rounded-xl cards, rounded-
 4. **Tailwind utility-first**: cero CSS custom salvo lo estrictamente necesario.
 5. **lucide-angular para iconos**: no SVGs propios salvo el logo.
 6. **ESLint boundaries activas desde el primer commit**.
+7. **Archivos separados por componente — OBLIGATORIO**: `xxx.component.ts` + `xxx.component.html` (`templateUrl`) + `xxx.component.css` (`styleUrl`). **Prohibido `template:`/`styles:` inline.** Enforced por `@angular-eslint/component-max-inline-declarations: ['error', { template: 0, styles: 0, animations: 0 }]`.
+8. **Verificación visual antes de terminar**: ningún componente se da por hecho sin levantar la app (`pnpm start`) y confirmar que renderiza CON estilos y matchea `docs/mockup.tsx`. Plantillas sin estilos = trabajo incompleto, no abras la PR.
+
+## Tailwind v4 — setup CSS-first (NO confundir con v3)
+
+Este proyecto usa **Tailwind v4**, que es CSS-first. Hazlo así o no se genera ninguna utilidad:
+- `src/styles.css` empieza con `@import "tailwindcss";` y la config va en un bloque `@theme { ... }` con los tokens del design system.
+- **NUNCA** uses `@tailwind base/components/utilities` (eso es v3 y con `@tailwindcss/postcss` produce CSS vacío → "no hay estilos").
+- **NO existe `tailwind.config.js`** en v4. El content-scanning es automático e incluye `.ts` y `.html` (por eso los templates inline NO rompen Tailwind; se prohíben por convención de equipo, no porque afecten el CSS).
+- Plugin PostCSS en `.postcssrc.json`: `{ "plugins": { "@tailwindcss/postcss": {} } }`. Sin `autoprefixer` (v4 lo incluye).
+- Si una clase como `bg-primary-600` no pinta color → Tailwind no está generando utilidades. Revisa estos 3 puntos antes que nada.
 
 ## Herramientas disponibles en este repo
 
