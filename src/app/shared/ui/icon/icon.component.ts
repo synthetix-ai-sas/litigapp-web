@@ -5,7 +5,8 @@ import { LucideAngularModule } from 'lucide-angular';
   selector: 'app-icon',
   standalone: true,
   imports: [LucideAngularModule],
-  template: `<lucide-angular [name]="name()" [size]="size()" [strokeWidth]="1.5" />`,
+  templateUrl: './icon.component.html',
+  styleUrl: './icon.component.css',
 })
 export class IconComponent {
   name = input<string>('');
