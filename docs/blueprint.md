@@ -274,14 +274,15 @@ litigapp-backend/
 │   │
 │   ├── LitigApp.Jobs/                          # csproj — referencia: Application, Infrastructure
 │   │   ├── ProcessSyncJobs/
-│   │   │   ├── OverviewSweepJob.cs             # recurrente cada 15min — overview de todos los procesos activos
-│   │   │   ├── ActionsSweepJob.cs              # encolado por OverviewSweep si hay pending_actions
-│   │   │   ├── CompletePartialFetchJob.cs      # encolado si creación individual quedó parcial por WAF
-│   │   │   └── BulkImportJob.cs                # encolado por POST /imports — hasta 5000 filas
+│   │   │   ├── OverviewSweepJob.cs             # RecurringJob cada Sweep.OverviewIntervalMinutes (default 15min) — solo overview
+│   │   │   ├── ActionsSweepJob.cs              # encolado por OverviewSweep — actuaciones pág.1 de los procesos con cambios
+│   │   │   └── CompletePartialFetchJob.cs      # encolado tras creación/import parcial — completa endpoints faltantes
 │   │   ├── NotificationJobs/
-│   │   │   ├── DispatchUserNotificationsJob.cs # triggered al final de ActionsSweep por cada usuario con cambios
-│   │   │   ├── DispatchImportCompleteJob.cs    # triggered al final de BulkImport — email de resumen
-│   │   │   └── NotificationFallbackSweepJob.cs # recurrente cada hora — reintenta outbox huérfanos
+│   │   │   ├── DispatchUserNotificationsJob.cs # triggered por sync — 1 email digest por usuario
+│   │   │   ├── DispatchImportCompleteJob.cs    # triggered al terminar un import
+│   │   │   └── NotificationFallbackSweepJob.cs # RecurringJob cada hora — recoge outbox pendiente (NO cada 5 min)
+│   │   ├── ImportJobs/
+│   │   │   └── BulkImportJob.cs                # encolado por POST /imports — procesa Excel
 │   │   ├── MaintenanceJobs/
 │   │   │   ├── OutboxCleanupJob.cs             # semanal — borra outbox 'sent' > 30 días
 │   │   │   └── ImportJobsCleanupJob.cs         # semanal — borra import_jobs > 90 días
@@ -357,7 +358,7 @@ litigapp-web/
 └── src/
     ├── main.ts
     ├── index.html
-    ├── styles.css                              # @tailwind base/components/utilities
+    ├── styles.css                              # Tailwind v4: @import "tailwindcss"; + @theme con tokens (NO @tailwind base/components/utilities — eso es v3)
     ├── environments/
     │   ├── environment.ts                      # apiUrl placeholder
     │   └── environment.prod.ts
@@ -1637,7 +1638,7 @@ Extraído directamente del mockup aprobado (`litigapp_mockup.tsx`).
 
 ### Tipografía
 
-- **Familia**: Inter (Tailwind default font-sans con configuración explícita en `tailwind.config.js`).
+- **Familia**: Inter, declarada en el bloque `@theme` de `styles.css` con `--font-sans: "Inter", ...` (Tailwind v4 es CSS-first; **no** hay `tailwind.config.js`).
 - **Escalas**: `text-xs`, `text-sm`, `text-base`, `text-lg`, `text-xl`, `text-2xl`.
 - **Pesos**: 400 (body), 500 (medium / labels), 600 (semibold / headings), 700 (bold / títulos grandes).
 
@@ -2498,21 +2499,48 @@ Esto deja la arquitectura preparada sin costo de tiempo ni dinero en MVP.
 ```bash
 pnpm dlx @angular/cli@20 new litigapp-web --routing --style=css --ssr=false --strict --standalone
 cd litigapp-web
-pnpm add -D tailwindcss @tailwindcss/postcss postcss autoprefixer
+pnpm add -D tailwindcss @tailwindcss/postcss   # Tailwind v4 — NO autoprefixer (v4 lo incluye)
 pnpm add lucide-angular @capacitor/core @capacitor/cli @capacitor/ios @capacitor/android
 ng add @angular/pwa
 npx cap init litigapp co.litigapp.app --web-dir=dist/litigapp-web/browser
 ```
 
-Configurar `tailwind.config.js` con `content: ['./src/**/*.{html,ts}']` y tokens del design system.
-Configurar `eslint.config.js` con `no-restricted-imports` para boundaries de capas.
-Habilitar **zoneless change detection** (disponible estable en Angular 20) en `app.config.ts`:
+**Setup de Tailwind v4 (CSS-first — crítico, aquí es donde se rompe si se hace con sintaxis v3):**
+
+1. `.postcssrc.json` en la raíz:
+   ```json
+   { "plugins": { "@tailwindcss/postcss": {} } }
+   ```
+2. `src/styles.css` — **única forma correcta en v4** (NO usar `@tailwind base/components/utilities`, eso es v3 y con `@tailwindcss/postcss` no genera NADA):
+   ```css
+   @import "tailwindcss";
+
+   @theme {
+     /* tokens del design system §8 — así se consumen como bg-primary-600, text-muted, etc. */
+     --color-primary-700: #1d4ed8;
+     --color-primary-600: #2563eb;
+     --color-primary-500: #3b82f6;
+     --color-background: #f8fafc;
+     --color-surface:    #ffffff;
+     --color-border:     #e2e8f0;
+     --color-text:       #1e293b;
+     --color-muted:      #64748b;
+     --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+   }
+   ```
+3. **NO existe `tailwind.config.js` en v4.** El content-scanning es automático (incluye `.ts` y `.html`); la config va en `@theme`.
+4. Verificación obligatoria: tras el scaffolding, `pnpm start` y confirmar visualmente que una clase de Tailwind (ej. `bg-primary-600`) **renderiza color**. Si no pinta, Tailwind no está generando utilidades — NO avanzar hasta arreglarlo.
+
+Configurar `eslint.config.js` con `no-restricted-imports` para boundaries de capas y la regla de estructura de componentes (ver abajo). Habilitar **zoneless change detection** (estable en Angular 20) en `app.config.ts`:
 ```typescript
 import { provideZonelessChangeDetection } from '@angular/core';
 providers: [provideZonelessChangeDetection(), ...]
 ```
 
-Configurar `tailwind.config.js` con tokens del design system. Configurar `eslint.config.js` con `no-restricted-imports`.
+**Estructura de componentes (obligatoria, enforced por ESLint):** cada componente usa **archivos separados** — `xxx.component.ts` + `xxx.component.html` (`templateUrl`) + `xxx.component.css` (`styleUrl`). **Prohibido `template:` o `styles:` inline.** Regla en `eslint.config.js`:
+```js
+'@angular-eslint/component-max-inline-declarations': ['error', { template: 0, styles: 0, animations: 0 }]
+```
 
 ### Step 15: Layout base + auth + interceptor
 
@@ -2981,7 +3009,7 @@ ASP.NET Core 10 (.NET 10 LTS, C# 14) + EF Core 10 + PostgreSQL 16 + Hangfire + J
 - `Domain` — entidades, value objects, eventos. Sin dependencias externas.
 - `Application` — handlers CQRS (sin MediatR — handlers propios), validators, contratos.
 - `Infrastructure` — EF Core, Identity, clientes externos (Rama Judicial, Resend, Meta), QuestPDF, ClosedXML.
-- `Jobs` — Hangfire jobs: HotSync (diario), DeepSync (encolado), NotificationDispatcher (cada 5min), InitialFetch.
+- `Jobs` — Hangfire jobs: OverviewSweep (recurrente 15min), ActionsSweep (encolado), CompletePartialFetch (encolado), DispatchUserNotifications/DispatchImportComplete (triggered), NotificationFallbackSweep (recurrente cada hora), BulkImport.
 - `Api` — endpoints organizados por feature (Minimal APIs con MapGroup), middleware, Program.cs.
 
 Reglas: Domain ← nada. Application ← Domain. Infrastructure ← App+Dom. Jobs ← App+Infra+Dom. Api ← todos.
@@ -3016,6 +3044,9 @@ Job (Hangfire) → Handler (Application) → IRamaJudicialClient (Infrastructure
 12. **Reactive Forms para todos los formularios** (no Template-driven).
 13. **Tailwind utility-first**: cero CSS custom salvo el strictly necesario.
 14. **lucide-angular para iconos**: no SVGs propios salvo logo.
+15. **Archivos separados por componente**: `templateUrl` + `styleUrl` siempre. **Prohibido `template:`/`styles:` inline** (enforced por `@angular-eslint/component-max-inline-declarations`).
+16. **Tailwind v4 CSS-first**: `@import "tailwindcss";` + `@theme` en `styles.css`. NUNCA `@tailwind base/components/utilities` (v3) ni `tailwind.config.js`.
+17. **Ningún componente se da por terminado sin verificación visual**: levantar la app (`pnpm start`) y confirmar que renderiza con estilos y matchea el mockup. Plantillas sin estilos = PR incompleta.
 
 ## Design System
 
