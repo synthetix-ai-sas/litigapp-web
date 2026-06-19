@@ -1,0 +1,19 @@
+@import 'tailwindcss';
+
+/* Inter is loaded via <link> in index.html (keeps @import order valid). */
+
+/* Design System (blueprint §8 / mockup): Inter typography, slate/blue palette */
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
