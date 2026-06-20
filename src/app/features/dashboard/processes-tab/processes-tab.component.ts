@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-processes-tab',
   standalone: true,
-  template: `<p>processes-tab placeholder</p>`,
+  templateUrl: './processes-tab.component.html',
+  styleUrl: './processes-tab.component.css',
 })
 export default class ProcessesTabComponent {}

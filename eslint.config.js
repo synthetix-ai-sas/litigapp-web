@@ -1,5 +1,6 @@
 // @ts-check
 const tseslint = require('typescript-eslint');
+const angular = require('angular-eslint');
 
 module.exports = tseslint.config(
   {
@@ -18,9 +19,16 @@ module.exports = tseslint.config(
         tsconfigRootDir: __dirname,
       },
     },
+    plugins: {
+      '@angular-eslint': angular.tsPlugin,
+    },
     rules: {
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      '@angular-eslint/component-max-inline-declarations': [
+        'error',
+        { template: 0, styles: 0, animations: 0 },
+      ],
     },
   },
 

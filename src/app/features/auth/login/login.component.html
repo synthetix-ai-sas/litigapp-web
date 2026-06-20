@@ -1,0 +1,128 @@
+<div class="flex min-h-screen items-center justify-center bg-background p-4">
+  <div class="w-full max-w-md">
+
+    <!-- Brand -->
+    <div class="mb-8 text-center">
+      <div class="inline-flex items-center gap-2.5 text-primary-700">
+        <lucide-angular name="scale" [size]="32" [strokeWidth]="2" />
+        <span class="text-2xl font-bold tracking-tight">LitigApp</span>
+      </div>
+      <p class="mt-1.5 text-sm text-text-muted">Monitoreo de procesos judiciales</p>
+    </div>
+
+    <!-- Card -->
+    <div class="bg-surface rounded-xl shadow-xl px-8 py-8">
+      <h1 class="text-xl font-bold text-text-primary mb-6">Iniciar sesión</h1>
+
+      <!-- Error -->
+      @if (error()) {
+        <div class="mb-5 flex items-start gap-2.5 rounded-lg bg-danger-bg border border-danger-border px-4 py-3">
+          <lucide-angular name="circle-alert" [size]="16" [strokeWidth]="2"
+            class="mt-0.5 shrink-0 text-danger-text" />
+          <p class="text-sm text-danger-text">{{ error() }}</p>
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+        <!-- Email -->
+        <div class="mb-4">
+          <label for="email" class="block text-sm font-medium text-text-secondary mb-1.5">
+            Correo electrónico
+          </label>
+          <div class="relative">
+            <lucide-angular name="mail" [size]="16" [strokeWidth]="1.5"
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-text-disabled pointer-events-none" />
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              autocomplete="email"
+              placeholder="tu@email.com"
+              class="w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm transition-colors
+                     placeholder:text-text-disabled outline-none
+                     focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+                     disabled:bg-background disabled:text-text-disabled"
+              [class.border-red-300]="emailInvalid"
+              [class.border-border-strong]="!emailInvalid"
+            />
+          </div>
+          @if (emailInvalid) {
+            <p class="mt-1 text-xs text-danger-text">Ingresa un correo electrónico válido</p>
+          }
+        </div>
+
+        <!-- Password -->
+        <div class="mb-6">
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="password" class="text-sm font-medium text-text-secondary">
+              Contraseña
+            </label>
+            <a
+              routerLink="/forgot-password"
+              class="text-xs text-primary-600 hover:text-primary-700 transition-colors"
+            >
+              ¿Olvidaste tu contraseña?
+            </a>
+          </div>
+          <div class="relative">
+            <lucide-angular name="lock" [size]="16" [strokeWidth]="1.5"
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-text-disabled pointer-events-none" />
+            <input
+              id="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              autocomplete="current-password"
+              placeholder="••••••••"
+              class="w-full pl-9 pr-10 py-2.5 border rounded-lg text-sm transition-colors
+                     placeholder:text-text-disabled outline-none
+                     focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+                     disabled:bg-background disabled:text-text-disabled"
+              [class.border-red-300]="passwordInvalid"
+              [class.border-border-strong]="!passwordInvalid"
+            />
+            <button
+              type="button"
+              (click)="showPassword.set(!showPassword())"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-text-disabled
+                     hover:text-text-secondary transition-colors"
+              [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            >
+              <lucide-angular
+                [name]="showPassword() ? 'eye-off' : 'eye'"
+                [size]="16" [strokeWidth]="1.5" />
+            </button>
+          </div>
+          @if (passwordInvalid) {
+            <p class="mt-1 text-xs text-danger-text">La contraseña es requerida</p>
+          }
+        </div>
+
+        <!-- Submit -->
+        <button
+          type="submit"
+          [disabled]="loading()"
+          class="w-full flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700
+                 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium
+                 py-2.5 rounded-lg transition-all text-sm shadow-sm hover:shadow-md"
+        >
+          @if (loading()) {
+            <lucide-angular name="loader-2" [size]="16" [strokeWidth]="2"
+              class="animate-spin" />
+            <span>Iniciando sesión...</span>
+          } @else {
+            <span>Iniciar sesión</span>
+          }
+        </button>
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <p class="mt-6 text-center text-sm text-text-muted">
+      ¿No tienes cuenta?
+      <a routerLink="/register"
+        class="ml-1 font-medium text-primary-600 hover:text-primary-700 transition-colors">
+        Regístrate gratis
+      </a>
+    </p>
+  </div>
+</div>
