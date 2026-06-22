@@ -1,17 +1,54 @@
 import { Routes } from '@angular/router';
-
 import { authGuard } from './core/auth/auth.guard';
+import { guestGuard } from './core/auth/guest.guard';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+  // Public-only routes (redirect to / if already authenticated)
   {
     path: 'login',
-    loadComponent: () => import('./features/auth/login/login').then((m) => m.Login),
+    canActivate: [guestGuard],
+    loadComponent: () => import('./features/auth/login/login.component'),
   },
   {
-    path: 'dashboard',
-    canActivate: [authGuard],
-    loadComponent: () => import('./features/dashboard/dashboard').then((m) => m.Dashboard),
+    path: 'register',
+    canActivate: [guestGuard],
+    loadComponent: () => import('./features/auth/register/register.component'),
   },
-  { path: '**', redirectTo: 'dashboard' },
+  {
+    path: 'forgot-password',
+    canActivate: [guestGuard],
+    loadComponent: () =>
+      import('./features/auth/forgot-password/forgot-password.component'),
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./features/auth/reset-password/reset-password.component'),
+  },
+
+  // Authenticated routes
+  {
+    path: '',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/dashboard/dashboard.component'),
+    children: [
+      { path: '', redirectTo: 'novelties', pathMatch: 'full' },
+      {
+        path: 'novelties',
+        loadComponent: () =>
+          import('./features/dashboard/novelties-tab/novelties-tab.component'),
+      },
+      {
+        path: 'processes',
+        loadComponent: () =>
+          import('./features/dashboard/processes-tab/processes-tab.component'),
+      },
+      {
+        path: 'settings',
+        loadComponent: () => import('./features/settings/settings.component'),
+      },
+    ],
+  },
+
+  { path: '**', redirectTo: '' },
 ];

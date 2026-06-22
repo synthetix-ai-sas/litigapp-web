@@ -1,5 +1,3 @@
-# See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
-
 # Compiled output
 /dist
 /tmp
@@ -10,6 +8,11 @@
 /node_modules
 npm-debug.log
 yarn-error.log
+pnpm-debug.log
+
+# Angular cache
+/.angular/cache
+/.angular
 
 # IDEs and editors
 .idea/
@@ -29,7 +32,6 @@ yarn-error.log
 .history/*
 
 # Miscellaneous
-/.angular/cache
 .sass-cache/
 /connect.lock
 /coverage
@@ -41,3 +43,20 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Capacitor
+/ios/App/Pods
+/ios/App/App.xcworkspace
+android/.gradle
+android/app/build
+android/build
+android/local.properties
+
+# Environment secrets (never commit)
+.env
+.env.local
+.env.*.local
+
+# Playwright
+/test-results
+/playwright-report

@@ -1,43 +1,114 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import { TokenStorageService } from './token-storage.service';
+import { AuthDataAccessService } from '../../data-access/auth.service';
+import type { AuthTokensDto, User } from '../../shared/domain/user.types';
 
-/**
- * TEMPORARY auth stub (Persona B).
- *
- * Owns only token storage + auth state so the dashboard can run and call the
- * backend behind the JwtInterceptor. The real auth flow (login/register/refresh
- * screens + AuthService) is task 2.A (Cristian). When 2.A lands, this is replaced.
- *
- * Coordinated contract to keep the swap clean:
- *   - public surface: `token()`, `isAuthenticated()`, `setToken()`, `logout()`
- *   - storage key:    'litigapp.accessToken'
- */
+interface JwtPayload {
+  sub: string;
+  email: string;
+  name?: string;
+  fullName?: string;
+  role?: string;
+  exp?: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private static readonly StorageKey = 'litigapp.accessToken';
+  private readonly storage = inject(TokenStorageService);
+  private readonly authData = inject(AuthDataAccessService);
+  private readonly router = inject(Router);
 
-  private readonly _token = signal<string | null>(this.readToken());
+  private readonly _currentUser = signal<User | null>(this.storage.getUser());
+  readonly currentUser = this._currentUser.asReadonly();
+  readonly isAuthenticated = computed(() => !!this._currentUser());
 
-  readonly token = this._token.asReadonly();
-  readonly isAuthenticated = computed(() => this._token() !== null);
+  private _refreshPromise: Promise<boolean> | null = null;
 
-  setToken(token: string | null): void {
-    if (token) {
-      localStorage.setItem(AuthService.StorageKey, token);
-    } else {
-      localStorage.removeItem(AuthService.StorageKey);
+  async login(email: string, password: string): Promise<void> {
+    try {
+      const tokens = await firstValueFrom(this.authData.login({ email, password }));
+      this._applySession(tokens);
+    } catch (err) {
+      throw this._toError(err, 'Error al iniciar sesión. Intenta de nuevo.');
     }
-    this._token.set(token);
+  }
+
+  async register(fullName: string, email: string, password: string): Promise<void> {
+    try {
+      const tokens = await firstValueFrom(this.authData.register({ fullName, email, password }));
+      this._applySession(tokens);
+    } catch (err) {
+      throw this._toError(err, 'Error al crear la cuenta. Intenta de nuevo.');
+    }
+  }
+
+  async tryRefresh(): Promise<boolean> {
+    if (this._refreshPromise) {
+      return this._refreshPromise;
+    }
+
+    this._refreshPromise = this._doRefresh().finally(() => {
+      this._refreshPromise = null;
+    });
+
+    return this._refreshPromise;
   }
 
   logout(): void {
-    this.setToken(null);
+    this.storage.clearSession();
+    this._currentUser.set(null);
+    this.router.navigate(['/login']);
   }
 
-  private readToken(): string | null {
+  private async _doRefresh(): Promise<boolean> {
+    const accessToken = this.storage.getAccessToken();
+    const refreshToken = this.storage.getRefreshToken();
+    if (!refreshToken || !accessToken) return false;
+
     try {
-      return localStorage.getItem(AuthService.StorageKey);
+      const tokens = await firstValueFrom(
+        this.authData.refresh({ accessToken, refreshToken }),
+      );
+      this._applySession(tokens);
+      return true;
     } catch {
-      return null;
+      this.storage.clearSession();
+      this._currentUser.set(null);
+      return false;
     }
+  }
+
+  private _applySession(tokens: AuthTokensDto): void {
+    const user = this._decodeUser(tokens.accessToken);
+    this.storage.saveSession(tokens.accessToken, tokens.refreshToken, user);
+    this._currentUser.set(user);
+  }
+
+  private _decodeUser(token: string): User {
+    try {
+      const payloadB64 = token.split('.')[1];
+      const decoded = JSON.parse(
+        atob(payloadB64.replace(/-/g, '+').replace(/_/g, '/')),
+      ) as JwtPayload;
+      return {
+        id: decoded.sub,
+        email: decoded.email,
+        fullName: decoded.fullName ?? decoded.name ?? decoded.email,
+      };
+    } catch {
+      return { id: '', email: '', fullName: '' };
+    }
+  }
+
+  /** Extracts the user-facing message from a ProblemDetails error or re-throws as-is. */
+  private _toError(err: unknown, fallback: string): Error {
+    if (err instanceof HttpErrorResponse) {
+      const detail: string | undefined = err.error?.detail ?? err.error?.title;
+      return new Error(detail ?? fallback);
+    }
+    return err instanceof Error ? err : new Error(fallback);
   }
 }
