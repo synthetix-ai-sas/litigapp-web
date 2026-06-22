@@ -32,6 +32,30 @@
     </div>
   </header>
 
+  <!-- IMPORT ACTIVE BANNER -->
+  @if (importActive()?.hasActive) {
+    @if (importActive()!.importJob; as job) {
+      <div class="bg-amber-50 border-b border-amber-200 px-4 py-2">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          <div class="flex items-center gap-2 text-amber-800 text-sm">
+            <lucide-icon [img]="Upload" [size]="16" class="shrink-0" />
+            <span>
+              <strong>Importación en curso:</strong> {{ job.fileName }} —
+              {{ job.processedRows }}/{{ job.totalRows }} filas procesadas
+              @if (job.status === 'paused') { <span class="ml-1 text-amber-600">(pausado por WAF)</span> }
+            </span>
+          </div>
+          <div class="w-32 bg-amber-200 rounded-full h-1.5 shrink-0">
+            <div
+              class="bg-amber-600 h-1.5 rounded-full transition-all duration-500"
+              [style.width.%]="job.totalRows > 0 ? (job.processedRows / job.totalRows) * 100 : 0"
+            ></div>
+          </div>
+        </div>
+      </div>
+    }
+  }
+
   <!-- MAIN -->
   <main class="max-w-7xl mx-auto px-4 py-8">
     <!-- TABS -->
@@ -137,7 +161,9 @@
           </div>
           <button
             (click)="openAgregar()"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors shadow-sm shrink-0"
+            [disabled]="importActive()?.hasActive"
+            [title]="importActive()?.hasActive ? 'Hay una importación en curso. Espera a que termine.' : ''"
+            class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors shadow-sm shrink-0"
           >
             <lucide-icon [img]="Plus" [size]="18" />
             Agregar Proceso
@@ -328,6 +354,14 @@
             @if (detailLoading()) {
               <div class="py-8 text-center text-slate-400">Cargando…</div>
             } @else if (selected(); as d) {
+              @if (d.syncStatus !== 'ok') {
+                <div
+                  class="bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-3 mb-4 text-sm flex items-start gap-2"
+                >
+                  <lucide-icon [img]="TriangleAlert" [size]="16" class="mt-0.5 shrink-0" />
+                  Estamos terminando de cargar los datos. Los datos se actualizarán automáticamente.
+                </div>
+              }
               <div class="mb-6 space-y-4">
                 <div>
                   <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">
@@ -464,7 +498,8 @@
 
       <!-- AGREGAR -->
       @if (modalType() === 'agregar') {
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[92vh]">
+          <!-- Header -->
           <div
             class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0"
           >
@@ -475,55 +510,116 @@
               <lucide-icon [img]="X" [size]="20" />
             </button>
           </div>
-          <div class="p-6 overflow-y-auto">
-            <form [formGroup]="addForm" (ngSubmit)="submitAdd()" class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Radicado (23 dígitos)</label>
-                <input
-                  type="text"
-                  formControlName="fileNumber"
-                  placeholder="Ej. 11001400300120230012300"
-                  class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none font-mono"
-                />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Alias (opcional)</label>
-                <input
-                  type="text"
-                  formControlName="alias"
-                  placeholder="Ej. Cliente Pérez"
-                  class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                />
-              </div>
 
-              @if (addError()) {
-                <p class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                  {{ addError() }}
-                </p>
+          <!-- Tab switcher -->
+          <div class="flex border-b border-slate-200 shrink-0 bg-white">
+            <button
+              (click)="addTab.set('full-number')"
+              class="flex-1 px-4 py-2.5 text-sm font-medium transition-colors relative"
+              [class.text-blue-600]="addTab() === 'full-number'"
+              [class.text-slate-500]="addTab() !== 'full-number'"
+            >
+              Número completo
+              @if (addTab() === 'full-number') {
+                <div class="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600"></div>
               }
+            </button>
+            <button
+              (click)="addTab.set('wizard')"
+              class="flex-1 px-4 py-2.5 text-sm font-medium transition-colors relative"
+              [class.text-blue-600]="addTab() === 'wizard'"
+              [class.text-slate-500]="addTab() !== 'wizard'"
+            >
+              Asistente
+              @if (addTab() === 'wizard') {
+                <div class="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600"></div>
+              }
+            </button>
+            <button
+              (click)="addTab.set('excel')"
+              class="flex-1 px-4 py-2.5 text-sm font-medium transition-colors relative"
+              [class.text-blue-600]="addTab() === 'excel'"
+              [class.text-slate-500]="addTab() !== 'excel'"
+            >
+              Excel
+              @if (addTab() === 'excel') {
+                <div class="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600"></div>
+              }
+            </button>
+          </div>
 
-              <p class="text-xs text-slate-400 flex items-center gap-1.5">
-                <lucide-icon [img]="FileSpreadsheet" [size]="14" /> La importación por Excel llega
-                pronto.
-              </p>
+          <!-- Tab content -->
+          <div class="overflow-y-auto flex-1">
 
-              <div class="pt-4 flex justify-end gap-3 border-t border-slate-100">
-                <button
-                  type="button"
-                  (click)="closeModal()"
-                  class="px-4 py-2 font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  [disabled]="actionPending()"
-                  class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium rounded-lg transition-colors"
-                >
-                  {{ actionPending() ? 'Creando…' : 'Guardar Proceso' }}
-                </button>
+            <!-- Tab: Número completo -->
+            @if (addTab() === 'full-number') {
+              <div class="p-6">
+                <form [formGroup]="addForm" (ngSubmit)="submitAdd()" class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Radicado (23 dígitos)</label>
+                    <input
+                      type="text"
+                      formControlName="fileNumber"
+                      placeholder="Ej. 11001400300120230012300"
+                      class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none font-mono"
+                      [class.border-red-400]="addForm.controls.fileNumber.invalid && addForm.controls.fileNumber.touched"
+                    />
+                    @if (addForm.controls.fileNumber.invalid && addForm.controls.fileNumber.touched) {
+                      <p class="text-xs text-red-500 mt-1">Ingresa exactamente 23 dígitos numéricos</p>
+                    }
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Alias (opcional)</label>
+                    <input
+                      type="text"
+                      formControlName="alias"
+                      placeholder="Ej. Cliente Pérez"
+                      class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    />
+                  </div>
+
+                  @if (addError()) {
+                    <p class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                      {{ addError() }}
+                    </p>
+                  }
+
+                  <div class="pt-4 flex justify-end gap-3 border-t border-slate-100">
+                    <button
+                      type="button"
+                      (click)="closeModal()"
+                      class="px-4 py-2 font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      [disabled]="actionPending()"
+                      class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium rounded-lg transition-colors"
+                    >
+                      {{ actionPending() ? 'Creando…' : 'Guardar Proceso' }}
+                    </button>
+                  </div>
+                </form>
               </div>
-            </form>
+            }
+
+            <!-- Tab: Asistente (Wizard) -->
+            @if (addTab() === 'wizard') {
+              <app-wizard
+                (created)="onWizardCreated()"
+                (cancelled)="closeModal()"
+              />
+            }
+
+            <!-- Tab: Excel (Import) -->
+            @if (addTab() === 'excel') {
+              <app-process-import
+                (completed)="onImportCompleted()"
+                (cancelled)="closeModal()"
+              />
+            }
+
           </div>
         </div>
       }

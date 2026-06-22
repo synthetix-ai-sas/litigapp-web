@@ -1,47 +1,65 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  OnDestroy,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
-  LucideAngularModule,
-  Scale,
   Bell,
-  FileText,
-  Search,
-  Eye,
+  Building,
   CheckCircle,
-  X,
   ChevronLeft,
   ChevronRight,
   Clock,
-  Building,
-  User,
   Download,
-  Plus,
-  Upload,
+  Eye,
   FileSpreadsheet,
+  FileText,
   LogOut,
+  LucideAngularModule,
+  Plus,
+  Scale,
+  Search,
   TriangleAlert,
+  Upload,
+  User,
+  X,
 } from 'lucide-angular';
+import { debounceTime } from 'rxjs';
 
 import { AuthService } from '../../core/auth/auth.service';
+import { ImportsService } from '../../data-access/imports.service';
 import { ProcessesService } from '../../data-access/processes.service';
+import { ImportActiveResponse } from '../../shared/domain/import';
 import { ProcessDetail, ProcessListItem } from '../../shared/domain/process';
+import { ProcessImport } from './process-import/process-import';
+import { Wizard } from './wizard/wizard';
 
 type Tab = 'novedades' | 'procesos';
 type ModalType = 'atender' | 'opciones' | 'agregar' | null;
+type AddTab = 'full-number' | 'wizard' | 'excel';
 const PAGE_SIZE = 20;
 
 @Component({
   selector: 'app-dashboard',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, LucideAngularModule],
+  imports: [ReactiveFormsModule, LucideAngularModule, Wizard, ProcessImport],
   templateUrl: './dashboard.html',
 })
-export class Dashboard implements OnInit {
+export class Dashboard implements OnInit, OnDestroy {
   private readonly processes = inject(ProcessesService);
+  private readonly importsService = inject(ImportsService);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
+  private readonly destroyRef = inject(DestroyRef);
 
   // icons
   protected readonly Scale = Scale;
@@ -87,6 +105,7 @@ export class Dashboard implements OnInit {
 
   // modals
   protected readonly modalType = signal<ModalType>(null);
+  protected readonly addTab = signal<AddTab>('full-number');
   protected readonly selected = signal<ProcessDetail | null>(null);
   protected readonly detailLoading = signal(false);
   protected readonly actionPending = signal(false);
@@ -98,9 +117,44 @@ export class Dashboard implements OnInit {
   });
   protected readonly addError = signal<string | null>(null);
 
+  // import active state (bloqueo UI)
+  protected readonly importActive = signal<ImportActiveResponse | null>(null);
+  private importActiveTimer?: ReturnType<typeof setInterval>;
+
+  // partial sync polling (detail dialog)
+  private syncPollingTimer?: ReturnType<typeof setInterval>;
+
   ngOnInit(): void {
     this.loadNovelties();
     this.loadProcesos();
+    this.startImportActivePolling();
+
+    // debounce 300ms en filtros de procesos
+    this.filterForm.valueChanges
+      .pipe(debounceTime(300), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.loadProcesos(1));
+  }
+
+  ngOnDestroy(): void {
+    clearInterval(this.importActiveTimer);
+    clearInterval(this.syncPollingTimer);
+  }
+
+  private startImportActivePolling(): void {
+    const poll = () =>
+      this.importsService.getActive().subscribe({
+        next: (res) => {
+          this.importActive.set(res);
+          if (res.hasActive && res.importJob?.status === 'completed') {
+            this.importActive.set({ hasActive: false, importJob: null });
+            this.loadProcesos(1);
+            this.loadNovelties();
+          }
+        },
+        error: () => {},
+      });
+    poll();
+    this.importActiveTimer = setInterval(poll, 3000);
   }
 
   protected setTab(tab: Tab): void {
@@ -123,7 +177,13 @@ export class Dashboard implements OnInit {
     this.procesosLoading.set(true);
     const f = this.filterForm.getRawValue();
     this.processes
-      .list({ page, pageSize: PAGE_SIZE, courtName: f.courtName, fileNumber: f.fileNumber, subjectName: f.subjectName })
+      .list({
+        page,
+        pageSize: PAGE_SIZE,
+        courtName: f.courtName,
+        fileNumber: f.fileNumber,
+        subjectName: f.subjectName,
+      })
       .subscribe({
         next: (res) => {
           this.procesos.set(res.items);
@@ -160,6 +220,9 @@ export class Dashboard implements OnInit {
       next: (detail) => {
         this.selected.set(detail);
         this.detailLoading.set(false);
+        if (detail.syncStatus !== 'ok') {
+          this.startSyncPolling(id);
+        }
       },
       error: () => {
         this.detailLoading.set(false);
@@ -168,9 +231,26 @@ export class Dashboard implements OnInit {
     });
   }
 
+  private startSyncPolling(processId: string): void {
+    clearInterval(this.syncPollingTimer);
+    this.syncPollingTimer = setInterval(() => {
+      this.processes.getById(processId).subscribe({
+        next: (detail) => {
+          this.selected.set(detail);
+          if (detail.syncStatus === 'ok') {
+            clearInterval(this.syncPollingTimer);
+          }
+        },
+        error: () => {},
+      });
+    }, 10000);
+  }
+
   protected openAgregar(): void {
+    if (this.importActive()?.hasActive) return;
     this.addForm.reset({ fileNumber: '', alias: '' });
     this.addError.set(null);
+    this.addTab.set('full-number');
     this.modalType.set('agregar');
   }
 
@@ -178,6 +258,7 @@ export class Dashboard implements OnInit {
     this.modalType.set(null);
     this.selected.set(null);
     this.actionPending.set(false);
+    clearInterval(this.syncPollingTimer);
   }
 
   protected markAttended(): void {
@@ -195,7 +276,6 @@ export class Dashboard implements OnInit {
         this.closeModal();
       },
       error: () => {
-        // rollback
         this.actionPending.set(false);
         this.loadNovelties();
       },
@@ -232,11 +312,25 @@ export class Dashboard implements OnInit {
         this.loadProcesos(1);
         this.loadNovelties();
       },
-      error: (err) => {
+      error: (err: { status?: number }) => {
         this.actionPending.set(false);
         this.addError.set(this.addErrorMessage(err?.status));
       },
     });
+  }
+
+  protected onWizardCreated(): void {
+    this.closeModal();
+    this.activeTab.set('procesos');
+    this.loadProcesos(1);
+    this.loadNovelties();
+  }
+
+  protected onImportCompleted(): void {
+    this.closeModal();
+    this.activeTab.set('procesos');
+    this.loadProcesos(1);
+    this.loadNovelties();
   }
 
   protected logout(): void {
