@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { environment } from '../../environments/environment';
+import { AppConfig } from '../core/config/app-config';
 import {
   FileNumberMode,
   ImportActiveResponse,
@@ -14,7 +14,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class ImportsService {
   private readonly http = inject(HttpClient);
-  private readonly base = `${environment.apiBaseUrl}/imports`;
+  private readonly base = `${AppConfig.apiUrl}/api/v1/imports`;
 
   preview(file: File): Observable<ImportPreview> {
     const form = new FormData();

@@ -1,16 +1,10 @@
-import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LucideAngularModule, Scale, LogIn } from 'lucide-angular';
 
-import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../core/auth/auth.service';
 
-/**
- * TEMPORARY login (Persona B stub). Authenticates against the backend so the
- * dashboard can run end-to-end. Replaced by Cristian's 2.A auth UI.
- */
 @Component({
   selector: 'app-login',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -19,7 +13,6 @@ import { AuthService } from '../../../core/auth/auth.service';
 })
 export class Login {
   private readonly fb = inject(FormBuilder);
-  private readonly http = inject(HttpClient);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
@@ -34,7 +27,7 @@ export class Login {
     password: ['', [Validators.required]],
   });
 
-  protected submit(): void {
+  protected async submit(): Promise<void> {
     if (this.form.invalid || this.loading()) {
       this.form.markAllAsTouched();
       return;
@@ -42,17 +35,13 @@ export class Login {
     this.loading.set(true);
     this.error.set(null);
 
-    this.http
-      .post<{ accessToken: string }>(`${environment.apiBaseUrl}/auth/login`, this.form.getRawValue())
-      .subscribe({
-        next: (res) => {
-          this.auth.setToken(res.accessToken);
-          this.router.navigate(['/dashboard']);
-        },
-        error: () => {
-          this.loading.set(false);
-          this.error.set('Credenciales inválidas o backend no disponible.');
-        },
-      });
+    try {
+      const { email, password } = this.form.getRawValue();
+      await this.auth.login(email, password);
+      this.router.navigate(['/dashboard']);
+    } catch (err) {
+      this.error.set(err instanceof Error ? err.message : 'Credenciales inválidas.');
+      this.loading.set(false);
+    }
   }
 }

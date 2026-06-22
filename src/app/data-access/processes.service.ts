@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { environment } from '../../environments/environment';
+import { AppConfig } from '../core/config/app-config';
 import {
   PagedResult,
   ProcessDetail,
@@ -14,7 +14,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class ProcessesService {
   private readonly http = inject(HttpClient);
-  private readonly base = `${environment.apiBaseUrl}/processes`;
+  private readonly base = `${AppConfig.apiUrl}/api/v1/processes`;
 
   listNovelties(page = 1, pageSize = 20): Observable<PagedResult<ProcessListItem>> {
     const params = new HttpParams().set('page', page).set('pageSize', pageSize);

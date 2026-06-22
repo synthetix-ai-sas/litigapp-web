@@ -1,7 +1,9 @@
 <div class="min-h-screen bg-slate-50 text-slate-800">
   <!-- HEADER -->
-  <header class="bg-blue-700 text-white shadow-md sticky top-0 z-10">
-    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+  <header class="bg-blue-700 text-white shadow-md sticky top-0 z-10"
+    style="padding-top: env(safe-area-inset-top, 0px)">
+    <div class="max-w-7xl mx-auto h-14 flex items-center justify-between"
+      style="padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right))">
       <div class="flex items-center gap-2">
         <lucide-icon [img]="Scale" [size]="28" />
         <h1 class="text-xl font-bold tracking-wide">LitigApp</h1>
@@ -57,38 +59,51 @@
   }
 
   <!-- MAIN -->
-  <main class="max-w-7xl mx-auto px-4 py-8">
+  <main class="max-w-7xl mx-auto py-6"
+    style="padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right)); padding-bottom: max(1.5rem, env(safe-area-inset-bottom))">
     <!-- TABS -->
-    <div class="flex border-b border-slate-200 mb-8">
-      <button
-        (click)="setTab('novedades')"
-        class="flex items-center gap-2 px-6 py-3 font-medium text-sm transition-colors relative"
-        [class.text-blue-600]="activeTab() === 'novedades'"
-        [class.text-slate-500]="activeTab() !== 'novedades'"
-      >
-        <lucide-icon [img]="Bell" [size]="18" />
-        Novedades
-        @if (noveltiesTotal() > 0) {
-          <span class="bg-red-100 text-red-600 py-0.5 px-2 rounded-full text-xs font-bold ml-1">{{
-            noveltiesTotal()
-          }}</span>
-        }
-        @if (activeTab() === 'novedades') {
-          <div class="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-t-md"></div>
-        }
-      </button>
+    <div class="flex items-center justify-between border-b border-slate-200 mb-8">
+      <div class="flex">
+        <button
+          (click)="setTab('novedades')"
+          class="flex items-center gap-2 px-6 py-3 font-medium text-sm transition-colors relative"
+          [class.text-blue-600]="activeTab() === 'novedades'"
+          [class.text-slate-500]="activeTab() !== 'novedades'"
+        >
+          <lucide-icon [img]="Bell" [size]="18" />
+          Novedades
+          @if (noveltiesTotal() > 0) {
+            <span class="bg-red-100 text-red-600 py-0.5 px-2 rounded-full text-xs font-bold ml-1">{{
+              noveltiesTotal()
+            }}</span>
+          }
+          @if (activeTab() === 'novedades') {
+            <div class="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-t-md"></div>
+          }
+        </button>
+
+        <button
+          (click)="setTab('procesos')"
+          class="flex items-center gap-2 px-6 py-3 font-medium text-sm transition-colors relative"
+          [class.text-blue-600]="activeTab() === 'procesos'"
+          [class.text-slate-500]="activeTab() !== 'procesos'"
+        >
+          <lucide-icon [img]="FileText" [size]="18" />
+          Procesos
+          @if (activeTab() === 'procesos') {
+            <div class="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-t-md"></div>
+          }
+        </button>
+      </div>
 
       <button
-        (click)="setTab('procesos')"
-        class="flex items-center gap-2 px-6 py-3 font-medium text-sm transition-colors relative"
-        [class.text-blue-600]="activeTab() === 'procesos'"
-        [class.text-slate-500]="activeTab() !== 'procesos'"
+        (click)="openAgregar()"
+        [disabled]="importActive()?.hasActive"
+        [title]="importActive()?.hasActive ? 'Hay una importación en curso. Espera a que termine.' : 'Agregar Proceso'"
+        class="mb-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-3 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors shadow-sm shrink-0"
       >
-        <lucide-icon [img]="FileText" [size]="18" />
-        Procesos
-        @if (activeTab() === 'procesos') {
-          <div class="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-t-md"></div>
-        }
+        <lucide-icon [img]="Plus" [size]="18" />
+        <span class="hidden sm:inline">Agregar Proceso</span>
       </button>
     </div>
 
@@ -154,20 +169,9 @@
     <!-- PROCESOS -->
     @if (activeTab() === 'procesos') {
       <section>
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-          <div>
-            <h2 class="text-2xl font-bold text-slate-800">Todos los procesos</h2>
-            <p class="text-slate-500 text-sm mt-1">Busca y gestiona tu portafolio completo.</p>
-          </div>
-          <button
-            (click)="openAgregar()"
-            [disabled]="importActive()?.hasActive"
-            [title]="importActive()?.hasActive ? 'Hay una importación en curso. Espera a que termine.' : ''"
-            class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors shadow-sm shrink-0"
-          >
-            <lucide-icon [img]="Plus" [size]="18" />
-            Agregar Proceso
-          </button>
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold text-slate-800">Todos los procesos</h2>
+          <p class="text-slate-500 text-sm mt-1">Busca y gestiona tu portafolio completo.</p>
         </div>
 
         <!-- FILTERS -->
