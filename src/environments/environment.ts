@@ -1,5 +1,6 @@
 export const environment = {
   production: false,
-  // Backend .NET API base (see litigapp-backend). Run it locally on :5000.
-  apiBaseUrl: 'http://localhost:5000/api/v1',
+  // Dev calls go same-origin and are proxied to the backend (proxy.conf.json),
+  // avoiding CORS. The backend runs locally on :5000.
+  apiBaseUrl: '/api/v1',
 };
