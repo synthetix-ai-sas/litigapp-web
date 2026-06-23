@@ -31,13 +31,13 @@ export const routes: Routes = [
     path: '',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./features/dashboard/dashboard').then(m => m.Dashboard),
+      import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
   },
   {
     path: 'dashboard',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./features/dashboard/dashboard').then(m => m.Dashboard),
+      import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
   },
 
   { path: '**', redirectTo: '' },

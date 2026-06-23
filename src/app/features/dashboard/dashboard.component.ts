@@ -46,9 +46,9 @@ const PAGE_SIZE = 20;
     OpcionesModalComponent,
     AgregarModalComponent,
   ],
-  templateUrl: './dashboard.html',
+  templateUrl: './dashboard.component.html',
 })
-export class Dashboard implements OnInit, OnDestroy {
+export class DashboardComponent implements OnInit, OnDestroy {
   private readonly processes = inject(ProcessesService);
   private readonly importsService = inject(ImportsService);
   private readonly auth = inject(AuthService);
