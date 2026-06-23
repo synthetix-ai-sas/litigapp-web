@@ -30,14 +30,24 @@ export const routes: Routes = [
   {
     path: '',
     canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/dashboard/dashboard').then(m => m.Dashboard),
-  },
-  {
-    path: 'dashboard',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/dashboard/dashboard').then(m => m.Dashboard),
+    loadComponent: () => import('./features/dashboard/dashboard.component'),
+    children: [
+      { path: '', redirectTo: 'novelties', pathMatch: 'full' },
+      {
+        path: 'novelties',
+        loadComponent: () =>
+          import('./features/dashboard/novelties-tab/novelties-tab.component'),
+      },
+      {
+        path: 'processes',
+        loadComponent: () =>
+          import('./features/dashboard/processes-tab/processes-tab.component'),
+      },
+      {
+        path: 'settings',
+        loadComponent: () => import('./features/settings/settings.component'),
+      },
+    ],
   },
 
   { path: '**', redirectTo: '' },
