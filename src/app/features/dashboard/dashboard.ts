@@ -11,26 +11,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import {
-  Bell,
-  Building,
-  CheckCircle,
-  ChevronLeft,
-  ChevronRight,
-  Clock,
-  Download,
-  Eye,
-  FileSpreadsheet,
-  FileText,
-  LucideAngularModule,
-  Plus,
-  Scale,
-  Search,
-  TriangleAlert,
-  Upload,
-  User,
-  X,
-} from 'lucide-angular';
+import { Bell, FileText, LucideAngularModule, Plus } from 'lucide-angular';
 import { debounceTime } from 'rxjs';
 
 import { AuthService } from '../../core/auth/auth.service';
@@ -39,8 +20,12 @@ import { ProcessesService } from '../../data-access/processes.service';
 import { ImportActiveResponse } from '../../shared/domain/import';
 import { ProcessDetail, ProcessListItem } from '../../shared/domain/process';
 import { MainLayoutComponent } from '../../shared/ui/layouts/main-layout/main-layout.component';
-import { ProcessImport } from './process-import/process-import';
-import { Wizard } from './wizard/wizard';
+import { AgregarModalComponent } from './agregar-modal/agregar-modal.component';
+import { AtenderModalComponent } from './atender-modal/atender-modal.component';
+import { ImportBannerComponent } from './import-banner/import-banner.component';
+import NoveltiesTabComponent from './novelties-tab/novelties-tab.component';
+import { OpcionesModalComponent } from './opciones-modal/opciones-modal.component';
+import ProcessesTabComponent from './processes-tab/processes-tab.component';
 
 type Tab = 'novedades' | 'procesos';
 type ModalType = 'atender' | 'opciones' | 'agregar' | null;
@@ -50,7 +35,17 @@ const PAGE_SIZE = 20;
 @Component({
   selector: 'app-dashboard',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, LucideAngularModule, Wizard, ProcessImport, MainLayoutComponent],
+  imports: [
+    ReactiveFormsModule,
+    LucideAngularModule,
+    MainLayoutComponent,
+    ImportBannerComponent,
+    NoveltiesTabComponent,
+    ProcessesTabComponent,
+    AtenderModalComponent,
+    OpcionesModalComponent,
+    AgregarModalComponent,
+  ],
   templateUrl: './dashboard.html',
 })
 export class Dashboard implements OnInit, OnDestroy {
@@ -62,23 +57,9 @@ export class Dashboard implements OnInit, OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
 
   // icons
-  protected readonly Scale = Scale;
   protected readonly Bell = Bell;
   protected readonly FileText = FileText;
-  protected readonly Search = Search;
-  protected readonly Eye = Eye;
-  protected readonly CheckCircle = CheckCircle;
-  protected readonly X = X;
-  protected readonly ChevronLeft = ChevronLeft;
-  protected readonly ChevronRight = ChevronRight;
-  protected readonly Clock = Clock;
-  protected readonly Building = Building;
-  protected readonly User = User;
-  protected readonly Download = Download;
   protected readonly Plus = Plus;
-  protected readonly Upload = Upload;
-  protected readonly FileSpreadsheet = FileSpreadsheet;
-  protected readonly TriangleAlert = TriangleAlert;
 
   protected readonly activeTab = signal<Tab>('novedades');
 
@@ -335,15 +316,6 @@ export class Dashboard implements OnInit, OnDestroy {
   protected logout(): void {
     this.auth.logout();
     this.router.navigate(['/login']);
-  }
-
-  protected formatDate(value: string | null): string {
-    if (!value) return '—';
-    return new Date(value).toLocaleDateString('es-CO', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
   }
 
   private addErrorMessage(status?: number): string {

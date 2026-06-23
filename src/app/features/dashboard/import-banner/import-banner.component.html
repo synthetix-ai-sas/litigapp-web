@@ -1,0 +1,22 @@
+@if (importJob()) {
+  <div class="bg-amber-50 border-b border-amber-200 px-4 py-2">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <div class="flex items-center gap-2 text-amber-800 text-sm">
+        <lucide-icon [img]="Upload" [size]="16" class="shrink-0" />
+        <span>
+          <strong>Importación en curso:</strong> {{ importJob()!.fileName }} —
+          {{ importJob()!.processedRows }}/{{ importJob()!.totalRows }} filas procesadas
+          @if (importJob()!.status === 'paused') {
+            <span class="ml-1 text-amber-600">(pausado por WAF)</span>
+          }
+        </span>
+      </div>
+      <div class="w-32 bg-amber-200 rounded-full h-1.5 shrink-0">
+        <div
+          class="bg-amber-600 h-1.5 rounded-full transition-all duration-500"
+          [style.width.%]="importJob()!.totalRows > 0 ? (importJob()!.processedRows / importJob()!.totalRows) * 100 : 0"
+        ></div>
+      </div>
+    </div>
+  </div>
+}
