@@ -22,7 +22,6 @@ import {
   Eye,
   FileSpreadsheet,
   FileText,
-  LogOut,
   LucideAngularModule,
   Plus,
   Scale,
@@ -39,6 +38,7 @@ import { ImportsService } from '../../data-access/imports.service';
 import { ProcessesService } from '../../data-access/processes.service';
 import { ImportActiveResponse } from '../../shared/domain/import';
 import { ProcessDetail, ProcessListItem } from '../../shared/domain/process';
+import { MainLayoutComponent } from '../../shared/ui/layouts/main-layout/main-layout.component';
 import { ProcessImport } from './process-import/process-import';
 import { Wizard } from './wizard/wizard';
 
@@ -50,7 +50,7 @@ const PAGE_SIZE = 20;
 @Component({
   selector: 'app-dashboard',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, LucideAngularModule, Wizard, ProcessImport],
+  imports: [ReactiveFormsModule, LucideAngularModule, Wizard, ProcessImport, MainLayoutComponent],
   templateUrl: './dashboard.html',
 })
 export class Dashboard implements OnInit, OnDestroy {
@@ -78,7 +78,6 @@ export class Dashboard implements OnInit, OnDestroy {
   protected readonly Plus = Plus;
   protected readonly Upload = Upload;
   protected readonly FileSpreadsheet = FileSpreadsheet;
-  protected readonly LogOut = LogOut;
   protected readonly TriangleAlert = TriangleAlert;
 
   protected readonly activeTab = signal<Tab>('novedades');

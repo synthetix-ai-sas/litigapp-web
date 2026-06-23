@@ -1,38 +1,4 @@
-<div class="min-h-screen bg-slate-50 text-slate-800">
-  <!-- HEADER -->
-  <header class="bg-blue-700 text-white shadow-md sticky top-0 z-10"
-    style="padding-top: env(safe-area-inset-top, 0px)">
-    <div class="max-w-7xl mx-auto h-14 flex items-center justify-between"
-      style="padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right))">
-      <div class="flex items-center gap-2">
-        <lucide-icon [img]="Scale" [size]="28" />
-        <h1 class="text-xl font-bold tracking-wide">LitigApp</h1>
-      </div>
-      <div class="flex items-center gap-4">
-        <div class="relative">
-          <lucide-icon [img]="Bell" [size]="20" />
-          @if (noveltiesTotal() > 0) {
-            <span
-              class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold"
-              >{{ noveltiesTotal() }}</span
-            >
-          }
-        </div>
-        <button
-          (click)="logout()"
-          title="Cerrar sesión"
-          class="flex items-center gap-1.5 text-sm text-blue-100 hover:text-white transition-colors"
-        >
-          <lucide-icon [img]="LogOut" [size]="18" />
-        </button>
-        <div
-          class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center border-2 border-white font-bold"
-        >
-          U
-        </div>
-      </div>
-    </div>
-  </header>
+<app-main-layout [noveltiesCount]="noveltiesTotal()" (logout)="logout()">
 
   <!-- IMPORT ACTIVE BANNER -->
   @if (importActive()?.hasActive) {
@@ -629,4 +595,4 @@
       }
     </div>
   }
-</div>
+</app-main-layout>
