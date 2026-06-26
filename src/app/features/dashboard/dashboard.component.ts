@@ -14,12 +14,10 @@ import { Router } from '@angular/router';
 import { Bell, FileText, LucideAngularModule, Plus } from 'lucide-angular';
 import { debounceTime } from 'rxjs';
 
-import { AuthService } from '../../core/auth/auth.service';
 import { ImportsService } from '../../data-access/imports.service';
 import { ProcessesService } from '../../data-access/processes.service';
 import { ImportActiveResponse } from '../../shared/domain/import';
 import { ProcessDetail, ProcessListItem } from '../../shared/domain/process';
-import { MainLayoutComponent } from '../../shared/ui/layouts/main-layout/main-layout.component';
 import { AgregarModalComponent } from './agregar-modal/agregar-modal.component';
 import { AtenderModalComponent } from './atender-modal/atender-modal.component';
 import { ImportBannerComponent } from './import-banner/import-banner.component';
@@ -38,7 +36,6 @@ const PAGE_SIZE = 20;
   imports: [
     ReactiveFormsModule,
     LucideAngularModule,
-    MainLayoutComponent,
     ImportBannerComponent,
     NoveltiesTabComponent,
     ProcessesTabComponent,
@@ -51,7 +48,6 @@ const PAGE_SIZE = 20;
 export class DashboardComponent implements OnInit, OnDestroy {
   private readonly processes = inject(ProcessesService);
   private readonly importsService = inject(ImportsService);
-  private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
@@ -311,11 +307,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.activeTab.set('procesos');
     this.loadProcesos(1);
     this.loadNovelties();
-  }
-
-  protected logout(): void {
-    this.auth.logout();
-    this.router.navigate(['/login']);
   }
 
   private addErrorMessage(status?: number): string {

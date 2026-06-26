@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/auth.guard';
 import { guestGuard } from './core/auth/guest.guard';
+import { AppShellComponent } from './shared/ui/layouts/app-shell/app-shell.component';
 
 export const routes: Routes = [
   // Public-only routes (redirect to / if already authenticated)
@@ -26,18 +27,28 @@ export const routes: Routes = [
       import('./features/auth/reset-password/reset-password.component'),
   },
 
-  // Authenticated routes
+  // Authenticated routes — AppShell provee header + logout para todas
   {
     path: '',
     canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
-  },
-  {
-    path: 'dashboard',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
+    component: AppShellComponent,
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
+      },
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
+      },
+      {
+        path: 'settings',
+        loadComponent: () =>
+          import('./features/settings/settings.component'),
+      },
+    ],
   },
 
   { path: '**', redirectTo: '' },

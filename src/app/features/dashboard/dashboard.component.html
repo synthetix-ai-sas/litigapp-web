@@ -1,9 +1,7 @@
-<app-main-layout [noveltiesCount]="noveltiesTotal()" (logout)="logout()">
+<app-import-banner [importJob]="importActive()?.importJob ?? null" />
 
-  <app-import-banner [importJob]="importActive()?.importJob ?? null" />
-
-  <main class="max-w-7xl mx-auto py-6"
-    style="padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right)); padding-bottom: max(1.5rem, env(safe-area-inset-bottom))">
+<main class="max-w-7xl mx-auto py-6"
+  style="padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right)); padding-bottom: max(1.5rem, env(safe-area-inset-bottom))">
 
     <!-- TABS NAV -->
     <div class="flex items-center justify-between border-b border-slate-200 mb-8">
@@ -62,37 +60,35 @@
         (goToPage)="goToPage($event)"
         (applyFilters)="applyFilters()" />
     }
-  </main>
+</main>
 
-  <!-- MODALS -->
-  @if (modalType() !== null) {
-    <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      @if (modalType() === 'atender') {
-        <app-atender-modal
-          [process]="selected()"
-          [loading]="detailLoading()"
-          [actionPending]="actionPending()"
-          (close)="closeModal()"
-          (markAttended)="markAttended()" />
-      }
-      @if (modalType() === 'opciones') {
-        <app-opciones-modal
-          [process]="selected()"
-          [loading]="detailLoading()"
-          (close)="closeModal()"
-          (downloadPdf)="downloadPdf()" />
-      }
-      @if (modalType() === 'agregar') {
-        <app-agregar-modal
-          [addForm]="addForm"
-          [addError]="addError()"
-          [actionPending]="actionPending()"
-          (close)="closeModal()"
-          (submitted)="submitAdd()"
-          (wizardCreated)="onWizardCreated()"
-          (importCompleted)="onImportCompleted()" />
-      }
-    </div>
-  }
-
-</app-main-layout>
+<!-- MODALS -->
+@if (modalType() !== null) {
+  <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    @if (modalType() === 'atender') {
+      <app-atender-modal
+        [process]="selected()"
+        [loading]="detailLoading()"
+        [actionPending]="actionPending()"
+        (close)="closeModal()"
+        (markAttended)="markAttended()" />
+    }
+    @if (modalType() === 'opciones') {
+      <app-opciones-modal
+        [process]="selected()"
+        [loading]="detailLoading()"
+        (close)="closeModal()"
+        (downloadPdf)="downloadPdf()" />
+    }
+    @if (modalType() === 'agregar') {
+      <app-agregar-modal
+        [addForm]="addForm"
+        [addError]="addError()"
+        [actionPending]="actionPending()"
+        (close)="closeModal()"
+        (submitted)="submitAdd()"
+        (wizardCreated)="onWizardCreated()"
+        (importCompleted)="onImportCompleted()" />
+    }
+  </div>
+}
