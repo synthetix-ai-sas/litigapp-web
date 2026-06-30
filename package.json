@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "node scripts/set-env.js && ng serve",
-    "build": "node scripts/set-env.js --prod && ng build",
+    "build": "node scripts/set-env.js && ng build",
     "set-env": "node scripts/set-env.js",
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false --browsers ChromeHeadless",
