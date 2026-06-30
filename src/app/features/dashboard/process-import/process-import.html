@@ -12,7 +12,7 @@
   @if (step() === 'upload') {
     <div class="space-y-5">
       <div>
-        <p class="text-sm text-slate-600 mb-4">Upload your Excel or CSV file with the file numbers to import.</p>
+        <p class="text-sm text-slate-600 mb-4">Sube tu archivo Excel o CSV con los radicados a importar.</p>
         <label
           class="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed rounded-xl cursor-pointer transition-colors"
           [class.border-blue-400]="dragOver()"
@@ -26,17 +26,17 @@
           <lucide-icon [img]="FileSpreadsheet" [size]="36" class="text-slate-400 mb-2" />
           @if (selectedFile()) {
             <p class="text-sm font-medium text-blue-700">{{ selectedFile()!.name }}</p>
-            <p class="text-xs text-slate-400 mt-1">Click to change the file</p>
+            <p class="text-xs text-slate-400 mt-1">Haz clic para cambiar el archivo</p>
           } @else {
-            <p class="text-sm font-medium text-slate-600">Drag the file here or click</p>
-            <p class="text-xs text-slate-400 mt-1">.xlsx, .xls or .csv</p>
+            <p class="text-sm font-medium text-slate-600">Arrastra el archivo aquí o haz clic</p>
+            <p class="text-xs text-slate-400 mt-1">.xlsx, .xls o .csv</p>
           }
           <input type="file" accept=".xlsx,.xls,.csv" class="hidden" (change)="onFileInput($event)" />
         </label>
       </div>
       <div class="flex justify-between">
         <button type="button" (click)="cancelled.emit()" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium transition-colors">
-          Cancel
+          Cancelar
         </button>
         <button
           type="button"
@@ -45,7 +45,7 @@
           class="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium rounded-lg transition-colors"
         >
           <lucide-icon [img]="Upload" [size]="18" />
-          {{ uploading() ? 'Processing…' : 'Continue' }}
+          {{ uploading() ? 'Procesando…' : 'Continuar' }}
         </button>
       </div>
     </div>
@@ -56,8 +56,8 @@
     @if (preview(); as p) {
       <div class="space-y-5">
         <div class="bg-slate-50 rounded-lg border border-slate-200 p-3 text-sm">
-          <p class="font-medium text-slate-700">Preview: <span class="text-blue-700">{{ p.rowCount }} rows detected</span></p>
-          <p class="text-slate-500 text-xs mt-0.5">Columns: {{ p.columns.join(', ') }}</p>
+          <p class="font-medium text-slate-700">Vista previa: <span class="text-blue-700">{{ p.rowCount }} filas detectadas</span></p>
+          <p class="text-slate-500 text-xs mt-0.5">Columnas: {{ p.columns.join(', ') }}</p>
         </div>
 
         <!-- Preview table -->
@@ -86,15 +86,15 @@
 
         <!-- File number mode -->
         <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-2">File number mode</label>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">Modo de radicado</label>
           <div class="flex gap-4">
             <label class="flex items-center gap-2 cursor-pointer">
               <input type="radio" name="fnMode" value="full" [checked]="fileNumberMode() === 'full'" (change)="fileNumberMode.set('full')" />
-              <span class="text-sm text-slate-700">Full (23 digits in one column)</span>
+              <span class="text-sm text-slate-700">Completo (23 dígitos en una columna)</span>
             </label>
             <label class="flex items-center gap-2 cursor-pointer">
               <input type="radio" name="fnMode" value="compose" [checked]="fileNumberMode() === 'compose'" (change)="fileNumberMode.set('compose')" />
-              <span class="text-sm text-slate-700">Composed (build from columns)</span>
+              <span class="text-sm text-slate-700">Compuesto (construir desde columnas)</span>
             </label>
           </div>
         </div>
@@ -103,10 +103,10 @@
         <form [formGroup]="mappingForm" (ngSubmit)="submitMapping()" class="space-y-3">
           @if (fileNumberMode() === 'full') {
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">File number column *</label>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Columna de radicado *</label>
               <select formControlName="fileNumberColumn" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none appearance-none bg-white text-sm"
                 [class.border-red-400]="mappingForm.controls.fileNumberColumn.invalid && mappingForm.controls.fileNumberColumn.touched">
-                <option value="">-- Select column --</option>
+                <option value="">-- Selecciona columna --</option>
                 @for (col of p.columns; track col) {
                   <option [value]="col">{{ col }}</option>
                 }
@@ -115,28 +115,28 @@
           } @else {
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">City</label>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Ciudad</label>
                 <select formControlName="cityColumn" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm appearance-none bg-white outline-none">
                   <option value="">—</option>
                   @for (col of p.columns; track col) { <option [value]="col">{{ col }}</option> }
                 </select>
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Court</label>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Despacho</label>
                 <select formControlName="courtColumn" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm appearance-none bg-white outline-none">
                   <option value="">—</option>
                   @for (col of p.columns; track col) { <option [value]="col">{{ col }}</option> }
                 </select>
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Filing year</label>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Año radicación</label>
                 <select formControlName="filingYearColumn" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm appearance-none bg-white outline-none">
                   <option value="">—</option>
                   @for (col of p.columns; track col) { <option [value]="col">{{ col }}</option> }
                 </select>
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">Consecutive number</label>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Consecutivo</label>
                 <select formControlName="consecutiveColumn" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm appearance-none bg-white outline-none">
                   <option value="">—</option>
                   @for (col of p.columns; track col) { <option [value]="col">{{ col }}</option> }
@@ -147,21 +147,21 @@
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Plaintiff (optional)</label>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Demandante (opcional)</label>
               <select formControlName="demandantColumn" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm appearance-none bg-white outline-none">
                 <option value="">—</option>
                 @for (col of p.columns; track col) { <option [value]="col">{{ col }}</option> }
               </select>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Defendant (optional)</label>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Demandado (opcional)</label>
               <select formControlName="demandadoColumn" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm appearance-none bg-white outline-none">
                 <option value="">—</option>
                 @for (col of p.columns; track col) { <option [value]="col">{{ col }}</option> }
               </select>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Alias (optional)</label>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Alias (opcional)</label>
               <select formControlName="aliasColumn" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm appearance-none bg-white outline-none">
                 <option value="">—</option>
                 @for (col of p.columns; track col) { <option [value]="col">{{ col }}</option> }
@@ -171,14 +171,14 @@
 
           <div class="flex justify-between pt-2">
             <button type="button" (click)="step.set('upload')" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium transition-colors">
-              Back
+              Atrás
             </button>
             <button
               type="submit"
               [disabled]="submitting()"
               class="px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium rounded-lg transition-colors"
             >
-              {{ submitting() ? 'Starting…' : 'Import' }}
+              {{ submitting() ? 'Iniciando…' : 'Importar' }}
             </button>
           </div>
         </form>
@@ -195,25 +195,25 @@
             <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-3">
               <lucide-icon [img]="CheckCircle" [size]="36" class="text-green-500" />
             </div>
-            <h4 class="text-lg font-bold text-slate-800">Import completed!</h4>
-            <p class="text-slate-500 text-sm mt-1">{{ job.processedRows }} case(s) imported successfully.</p>
+            <h4 class="text-lg font-bold text-slate-800">¡Importación completada!</h4>
+            <p class="text-slate-500 text-sm mt-1">{{ job.processedRows }} proceso(s) importados correctamente.</p>
           </div>
         } @else if (job.status === 'failed') {
           <div class="text-center py-4">
             <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3">
               <lucide-icon [img]="X" [size]="36" class="text-red-400" />
             </div>
-            <h4 class="text-lg font-bold text-slate-800">Import error</h4>
-            <p class="text-slate-500 text-sm mt-1">{{ job.processedRows }} of {{ job.totalRows }} processed before the error.</p>
+            <h4 class="text-lg font-bold text-slate-800">Error en la importación</h4>
+            <p class="text-slate-500 text-sm mt-1">{{ job.processedRows }} de {{ job.totalRows }} procesados antes del error.</p>
             <button type="button" (click)="cancelled.emit()" class="mt-4 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg transition-colors">
-              Close
+              Cerrar
             </button>
           </div>
         } @else {
           <div>
             <div class="flex justify-between items-center mb-2">
               <p class="text-sm font-medium text-slate-700">
-                {{ job.status === 'paused' ? 'Paused (WAF)…' : 'Importing cases…' }}
+                {{ job.status === 'paused' ? 'En pausa (WAF)…' : 'Importando procesos…' }}
               </p>
               <span class="text-sm font-bold text-blue-700">{{ progressPct }}%</span>
             </div>
@@ -224,18 +224,18 @@
               ></div>
             </div>
             <p class="text-xs text-slate-400 mt-2">
-              {{ job.processedRows }} / {{ job.totalRows }} rows · {{ job.fileName }}
+              {{ job.processedRows }} / {{ job.totalRows }} filas · {{ job.fileName }}
             </p>
             @if (job.status === 'paused') {
               <p class="text-xs text-amber-600 mt-1 flex items-center gap-1">
                 <lucide-icon [img]="TriangleAlert" [size]="12" />
-                Waiting for the Judicial Branch's traffic limit. Will continue automatically.
+                Esperando límite de tráfico de la Rama Judicial. Continuará automáticamente.
               </p>
             }
           </div>
         }
       } @else {
-        <div class="text-center text-slate-400 py-4">Starting import…</div>
+        <div class="text-center text-slate-400 py-4">Iniciando importación…</div>
       }
     </div>
   }

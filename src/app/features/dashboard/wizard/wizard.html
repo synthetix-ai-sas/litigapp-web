@@ -1,7 +1,7 @@
 <div class="p-6">
   <!-- Stepper indicator -->
   <div class="flex items-center justify-between mb-8">
-    @for (label of ['Department', 'City', 'Court', 'Details']; track $index) {
+    @for (label of ['Departamento', 'Ciudad', 'Despacho', 'Datos']; track $index) {
       <div class="flex items-center" [class.flex-1]="$index < 3">
         <div class="flex flex-col items-center">
           <div
@@ -42,13 +42,13 @@
     </div>
   }
 
-  <!-- Step 1: Department -->
+  <!-- Step 1: Departamento -->
   @if (step() === 1) {
     <div class="space-y-4">
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">Select the department</label>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Selecciona el departamento</label>
         @if (loading()) {
-          <div class="text-slate-400 text-sm py-2">Loading departments…</div>
+          <div class="text-slate-400 text-sm py-2">Cargando departamentos…</div>
         } @else {
           <div class="relative">
             <lucide-icon [img]="Building" [size]="16" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -57,7 +57,7 @@
               (change)="selectedDeptId.set($any($event.target).value)"
               class="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none bg-white"
             >
-              <option value="">-- Select a department --</option>
+              <option value="">-- Selecciona un departamento --</option>
               @for (dept of departments(); track dept.id) {
                 <option [value]="dept.id">{{ dept.name }}</option>
               }
@@ -70,26 +70,26 @@
           type="button"
           (click)="cancelled.emit()"
           class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium transition-colors"
-        >Cancel</button>
+        >Cancelar</button>
         <button
           type="button"
           (click)="goToStep2()"
           [disabled]="!selectedDeptId() || loading()"
           class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium rounded-lg transition-colors"
         >
-          Next <lucide-icon [img]="ChevronRight" [size]="18" />
+          Siguiente <lucide-icon [img]="ChevronRight" [size]="18" />
         </button>
       </div>
     </div>
   }
 
-  <!-- Step 2: City -->
+  <!-- Step 2: Ciudad -->
   @if (step() === 2) {
     <div class="space-y-4">
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">Select the city</label>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Selecciona la ciudad</label>
         @if (loading()) {
-          <div class="text-slate-400 text-sm py-2">Loading cities…</div>
+          <div class="text-slate-400 text-sm py-2">Cargando ciudades…</div>
         } @else {
           <div class="relative">
             <lucide-icon [img]="MapPin" [size]="16" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -98,7 +98,7 @@
               (change)="selectedCityId.set($any($event.target).value)"
               class="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none bg-white"
             >
-              <option value="">-- Select a city --</option>
+              <option value="">-- Selecciona una ciudad --</option>
               @for (city of cities(); track city.id) {
                 <option [value]="city.id">{{ city.name }}</option>
               }
@@ -108,7 +108,7 @@
       </div>
       <div class="flex justify-between pt-2">
         <button type="button" (click)="back()" class="flex items-center gap-1.5 px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium transition-colors">
-          <lucide-icon [img]="ChevronLeft" [size]="18" /> Back
+          <lucide-icon [img]="ChevronLeft" [size]="18" /> Atrás
         </button>
         <button
           type="button"
@@ -116,24 +116,24 @@
           [disabled]="!selectedCityId() || loading()"
           class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium rounded-lg transition-colors"
         >
-          Next <lucide-icon [img]="ChevronRight" [size]="18" />
+          Siguiente <lucide-icon [img]="ChevronRight" [size]="18" />
         </button>
       </div>
     </div>
   }
 
-  <!-- Step 3: Court -->
+  <!-- Step 3: Despacho -->
   @if (step() === 3) {
     <div class="space-y-4">
       @if (specialties().length > 0) {
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Filter by specialty (optional)</label>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Filtrar por especialidad (opcional)</label>
           <select
             [value]="selectedSpecialtyId()"
             (change)="selectedSpecialtyId.set($any($event.target).value); filterCourts()"
             class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none bg-white text-sm"
           >
-            <option value="">All specialties</option>
+            <option value="">Todas las especialidades</option>
             @for (spec of specialties(); track spec.id) {
               <option [value]="spec.id">{{ spec.name }}</option>
             }
@@ -141,11 +141,11 @@
         </div>
       }
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">Select the court</label>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Selecciona el despacho</label>
         @if (loading()) {
-          <div class="text-slate-400 text-sm py-2">Loading courts…</div>
+          <div class="text-slate-400 text-sm py-2">Cargando despachos…</div>
         } @else if (courts().length === 0) {
-          <p class="text-slate-400 text-sm py-2">No courts were found for this city.</p>
+          <p class="text-slate-400 text-sm py-2">No se encontraron despachos para esta ciudad.</p>
         } @else {
           <div class="relative">
             <lucide-icon [img]="Scale" [size]="16" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -154,7 +154,7 @@
               (change)="selectedCourtId.set($any($event.target).value)"
               class="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none bg-white"
             >
-              <option value="">-- Select a court --</option>
+              <option value="">-- Selecciona un despacho --</option>
               @for (court of courts(); track court.id) {
                 <option [value]="court.id">{{ court.name }}</option>
               }
@@ -164,7 +164,7 @@
       </div>
       <div class="flex justify-between pt-2">
         <button type="button" (click)="back()" class="flex items-center gap-1.5 px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium transition-colors">
-          <lucide-icon [img]="ChevronLeft" [size]="18" /> Back
+          <lucide-icon [img]="ChevronLeft" [size]="18" /> Atrás
         </button>
         <button
           type="button"
@@ -172,18 +172,18 @@
           [disabled]="!selectedCourtId() || loading()"
           class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium rounded-lg transition-colors"
         >
-          Next <lucide-icon [img]="ChevronRight" [size]="18" />
+          Siguiente <lucide-icon [img]="ChevronRight" [size]="18" />
         </button>
       </div>
     </div>
   }
 
-  <!-- Step 4: Case details -->
+  <!-- Step 4: Datos del proceso -->
   @if (step() === 4) {
     <form [formGroup]="step4Form" (ngSubmit)="submit()" class="space-y-4">
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">Filing year</label>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Año de radicación</label>
           <input
             type="number"
             formControlName="filingYear"
@@ -191,45 +191,45 @@
             [class.border-red-400]="step4Form.controls.filingYear.invalid && step4Form.controls.filingYear.touched"
           />
           @if (step4Form.controls.filingYear.invalid && step4Form.controls.filingYear.touched) {
-            <p class="text-xs text-red-500 mt-1">Invalid year</p>
+            <p class="text-xs text-red-500 mt-1">Año inválido</p>
           }
         </div>
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">Consecutive number</label>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Consecutivo</label>
           <div class="relative">
             <lucide-icon [img]="Hash" [size]="16" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               formControlName="consecutive"
-              placeholder="E.g. 12300"
+              placeholder="Ej. 12300"
               class="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none font-mono"
               [class.border-red-400]="step4Form.controls.consecutive.invalid && step4Form.controls.consecutive.touched"
             />
           </div>
           @if (step4Form.controls.consecutive.invalid && step4Form.controls.consecutive.touched) {
-            <p class="text-xs text-red-500 mt-1">Digits only, max. 11</p>
+            <p class="text-xs text-red-500 mt-1">Solo dígitos, máx. 11</p>
           }
         </div>
       </div>
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">Alias (optional)</label>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Alias (opcional)</label>
         <input
           type="text"
           formControlName="alias"
-          placeholder="E.g. Client Smith"
+          placeholder="Ej. Cliente Pérez"
           class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
         />
       </div>
       <div class="flex justify-between pt-2">
         <button type="button" (click)="back()" class="flex items-center gap-1.5 px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium transition-colors">
-          <lucide-icon [img]="ChevronLeft" [size]="18" /> Back
+          <lucide-icon [img]="ChevronLeft" [size]="18" /> Atrás
         </button>
         <button
           type="submit"
           [disabled]="submitting()"
           class="px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium rounded-lg transition-colors"
         >
-          {{ submitting() ? 'Creating…' : 'Save Case' }}
+          {{ submitting() ? 'Creando…' : 'Guardar Proceso' }}
         </button>
       </div>
     </form>

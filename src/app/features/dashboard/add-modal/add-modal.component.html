@@ -1,7 +1,7 @@
 <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[92vh]">
   <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
     <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-      <lucide-icon [img]="Plus" [size]="20" class="text-blue-600" /> Add New Case
+      <lucide-icon [img]="Plus" [size]="20" class="text-blue-600" /> Agregar Nuevo Proceso
     </h3>
     <button (click)="close.emit()" class="text-slate-400 hover:text-slate-600">
       <lucide-icon [img]="X" [size]="20" />
@@ -28,17 +28,17 @@
       <div class="p-6">
         <form [formGroup]="addForm()" (ngSubmit)="submitted.emit()" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">File number (23 digits)</label>
-            <input type="text" formControlName="fileNumber" placeholder="E.g. 11001400300120230012300"
+            <label class="block text-sm font-medium text-slate-700 mb-1">Radicado (23 dígitos)</label>
+            <input type="text" formControlName="fileNumber" placeholder="Ej. 11001400300120230012300"
               class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none font-mono"
               [class.border-red-400]="addForm().controls['fileNumber'].invalid && addForm().controls['fileNumber'].touched" />
             @if (addForm().controls['fileNumber'].invalid && addForm().controls['fileNumber'].touched) {
-              <p class="text-xs text-red-500 mt-1">Enter exactly 23 numeric digits</p>
+              <p class="text-xs text-red-500 mt-1">Ingresa exactamente 23 dígitos numéricos</p>
             }
           </div>
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Alias (optional)</label>
-            <input type="text" formControlName="alias" placeholder="E.g. Client Smith"
+            <label class="block text-sm font-medium text-slate-700 mb-1">Alias (opcional)</label>
+            <input type="text" formControlName="alias" placeholder="Ej. Cliente Pérez"
               class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" />
           </div>
           @if (addError()) {
@@ -47,11 +47,11 @@
           <div class="pt-4 flex justify-end gap-3 border-t border-slate-100">
             <button type="button" (click)="close.emit()"
               class="px-4 py-2 font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
-              Cancel
+              Cancelar
             </button>
             <button type="submit" [disabled]="actionPending()"
               class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium rounded-lg transition-colors">
-              {{ actionPending() ? 'Creating…' : 'Save Case' }}
+              {{ actionPending() ? 'Creando…' : 'Guardar Proceso' }}
             </button>
           </div>
         </form>

@@ -7,12 +7,12 @@
         <lucide-angular name="scale" [size]="32" [strokeWidth]="2" />
         <span class="text-2xl font-bold tracking-tight">LitigApp</span>
       </div>
-      <p class="mt-1.5 text-sm text-text-muted">Judicial case monitoring</p>
+      <p class="mt-1.5 text-sm text-text-muted">Monitoreo de procesos judiciales</p>
     </div>
 
     <!-- Card -->
     <div class="bg-surface rounded-xl shadow-xl px-8 py-8">
-      <h1 class="text-xl font-bold text-text-primary mb-6">Log in</h1>
+      <h1 class="text-xl font-bold text-text-primary mb-6">Iniciar sesión</h1>
 
       <!-- Error -->
       @if (error()) {
@@ -27,7 +27,7 @@
         <!-- Email -->
         <div class="mb-4">
           <label for="email" class="block text-sm font-medium text-text-secondary mb-1.5">
-            Email
+            Correo electrónico
           </label>
           <div class="relative">
             <lucide-angular name="mail" [size]="16" [strokeWidth]="1.5"
@@ -37,7 +37,7 @@
               type="email"
               formControlName="email"
               autocomplete="email"
-              placeholder="you@email.com"
+              placeholder="tu@email.com"
               class="w-full pl-9 pr-3 py-2.5 border rounded-lg text-sm transition-colors
                      placeholder:text-text-disabled outline-none
                      focus:ring-2 focus:ring-primary-500 focus:border-primary-500
@@ -47,7 +47,7 @@
             />
           </div>
           @if (emailInvalid) {
-            <p class="mt-1 text-xs text-danger-text">Enter a valid email address</p>
+            <p class="mt-1 text-xs text-danger-text">Ingresa un correo electrónico válido</p>
           }
         </div>
 
@@ -55,13 +55,13 @@
         <div class="mb-6">
           <div class="flex items-center justify-between mb-1.5">
             <label for="password" class="text-sm font-medium text-text-secondary">
-              Password
+              Contraseña
             </label>
             <a
               routerLink="/forgot-password"
               class="text-xs text-primary-600 hover:text-primary-700 transition-colors"
             >
-              Forgot your password?
+              ¿Olvidaste tu contraseña?
             </a>
           </div>
           <div class="relative">
@@ -85,7 +85,7 @@
               (click)="showPassword.set(!showPassword())"
               class="absolute right-3 top-1/2 -translate-y-1/2 text-text-disabled
                      hover:text-text-secondary transition-colors"
-              [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+              [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
             >
               <lucide-angular
                 [name]="showPassword() ? 'eye-off' : 'eye'"
@@ -93,7 +93,7 @@
             </button>
           </div>
           @if (passwordInvalid) {
-            <p class="mt-1 text-xs text-danger-text">Password is required</p>
+            <p class="mt-1 text-xs text-danger-text">La contraseña es requerida</p>
           }
         </div>
 
@@ -108,9 +108,9 @@
           @if (loading()) {
             <lucide-angular name="loader-2" [size]="16" [strokeWidth]="2"
               class="animate-spin" />
-            <span>Logging in...</span>
+            <span>Iniciando sesión...</span>
           } @else {
-            <span>Log in</span>
+            <span>Iniciar sesión</span>
           }
         </button>
       </form>
@@ -118,10 +118,10 @@
 
     <!-- Footer -->
     <p class="mt-6 text-center text-sm text-text-muted">
-      Don't have an account?
+      ¿No tienes cuenta?
       <a routerLink="/register"
         class="ml-1 font-medium text-primary-600 hover:text-primary-700 transition-colors">
-        Sign up for free
+        Regístrate gratis
       </a>
     </p>
   </div>
