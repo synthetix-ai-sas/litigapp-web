@@ -14,7 +14,7 @@ import { formatDate } from '../../../shared/util/format-date';
 export default class NoveltiesTabComponent {
   novelties = input<ProcessListItem[]>([]);
   loading = input<boolean>(false);
-  atender = output<ProcessListItem>();
+  attend = output<ProcessListItem>();
 
   protected readonly Bell = Bell;
   protected readonly CheckCircle = CheckCircle;

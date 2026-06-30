@@ -1,7 +1,7 @@
 <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden">
   <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
     <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-      <lucide-icon [img]="Bell" [size]="20" class="text-amber-500" /> Atender Novedad
+      <lucide-icon [img]="Bell" [size]="20" class="text-amber-500" /> Attend Update
     </h3>
     <button (click)="close.emit()" class="text-slate-400 hover:text-slate-600">
       <lucide-icon [img]="X" [size]="20" />
@@ -9,38 +9,38 @@
   </div>
   <div class="p-6">
     @if (loading()) {
-      <div class="py-8 text-center text-slate-400">Cargando…</div>
+      <div class="py-8 text-center text-slate-400">Loading…</div>
     } @else if (process(); as d) {
       @if (d.syncStatus !== 'ok') {
         <div class="bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-3 mb-4 text-sm flex items-start gap-2">
           <lucide-icon [img]="TriangleAlert" [size]="16" class="mt-0.5 shrink-0" />
-          Estamos terminando de cargar los datos. Los datos se actualizarán automáticamente.
+          We're still finishing loading the data. It will update automatically.
         </div>
       }
       <div class="mb-6 space-y-4">
         <div>
-          <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Proceso / Radicado</p>
+          <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Case / File number</p>
           <p class="text-base font-mono text-slate-800 bg-slate-100 p-2 rounded-md border border-slate-200 break-all">
             {{ d.fileNumber }}
           </p>
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Última actuación</p>
+            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Last court action</p>
             <p class="font-medium text-slate-800 flex items-center gap-1">
               <lucide-icon [img]="Clock" [size]="16" class="text-slate-400" />
               {{ formatDate(d.lastCourtActionAt) }}
             </p>
           </div>
           <div>
-            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Estado</p>
+            <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Status</p>
             <p class="font-bold text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200 inline-block">
               {{ d.currentStatus ?? '—' }}
             </p>
           </div>
         </div>
         <div>
-          <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Sujetos procesales</p>
+          <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Parties</p>
           <div class="space-y-1">
             @for (s of d.subjects; track $index) {
               <p class="text-slate-700 text-sm flex items-center gap-2 p-2 bg-slate-50 rounded border border-slate-200">
@@ -54,11 +54,11 @@
       <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
         <button (click)="close.emit()"
           class="px-5 py-2.5 rounded-lg font-medium text-slate-600 hover:bg-slate-100 transition-colors">
-          Cancelar
+          Cancel
         </button>
         <button (click)="markAttended.emit()" [disabled]="actionPending()"
           class="px-5 py-2.5 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60 transition-colors shadow-sm flex items-center gap-2">
-          <lucide-icon [img]="CheckCircle" [size]="18" /> Marcar como Atendido
+          <lucide-icon [img]="CheckCircle" [size]="18" /> Mark as Attended
         </button>
       </div>
     }

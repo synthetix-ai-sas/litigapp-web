@@ -18,15 +18,15 @@ import { ImportsService } from '../../data-access/imports.service';
 import { ProcessesService } from '../../data-access/processes.service';
 import { ImportActiveResponse } from '../../shared/domain/import';
 import { ProcessDetail, ProcessListItem } from '../../shared/domain/process';
-import { AgregarModalComponent } from './agregar-modal/agregar-modal.component';
-import { AtenderModalComponent } from './atender-modal/atender-modal.component';
+import { AddModalComponent } from './add-modal/add-modal.component';
+import { AttendModalComponent } from './attend-modal/attend-modal.component';
 import { ImportBannerComponent } from './import-banner/import-banner.component';
 import NoveltiesTabComponent from './novelties-tab/novelties-tab.component';
-import { OpcionesModalComponent } from './opciones-modal/opciones-modal.component';
+import { OptionsModalComponent } from './options-modal/options-modal.component';
 import ProcessesTabComponent from './processes-tab/processes-tab.component';
 
-type Tab = 'novedades' | 'procesos';
-type ModalType = 'atender' | 'opciones' | 'agregar' | null;
+type Tab = 'novelties' | 'cases';
+type ModalType = 'attend' | 'options' | 'add' | null;
 type AddTab = 'full-number' | 'wizard' | 'excel';
 const PAGE_SIZE = 20;
 
@@ -39,9 +39,9 @@ const PAGE_SIZE = 20;
     ImportBannerComponent,
     NoveltiesTabComponent,
     ProcessesTabComponent,
-    AtenderModalComponent,
-    OpcionesModalComponent,
-    AgregarModalComponent,
+    AttendModalComponent,
+    OptionsModalComponent,
+    AddModalComponent,
   ],
   templateUrl: './dashboard.component.html',
 })
@@ -57,20 +57,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
   protected readonly FileText = FileText;
   protected readonly Plus = Plus;
 
-  protected readonly activeTab = signal<Tab>('novedades');
+  protected readonly activeTab = signal<Tab>('novelties');
 
-  // novedades
+  // novelties
   protected readonly novelties = signal<ProcessListItem[]>([]);
   protected readonly noveltiesTotal = signal(0);
   protected readonly noveltiesLoading = signal(false);
 
-  // procesos
-  protected readonly procesos = signal<ProcessListItem[]>([]);
-  protected readonly procesosTotal = signal(0);
-  protected readonly procesosPage = signal(1);
-  protected readonly procesosLoading = signal(false);
-  protected readonly procesosTotalPages = computed(() =>
-    Math.max(1, Math.ceil(this.procesosTotal() / PAGE_SIZE)),
+  // cases
+  protected readonly cases = signal<ProcessListItem[]>([]);
+  protected readonly casesTotal = signal(0);
+  protected readonly casesPage = signal(1);
+  protected readonly casesLoading = signal(false);
+  protected readonly casesTotalPages = computed(() =>
+    Math.max(1, Math.ceil(this.casesTotal() / PAGE_SIZE)),
   );
 
   protected readonly filterForm = this.fb.nonNullable.group({
@@ -86,14 +86,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   protected readonly detailLoading = signal(false);
   protected readonly actionPending = signal(false);
 
-  // agregar (full-number)
+  // add (full-number)
   protected readonly addForm = this.fb.nonNullable.group({
     fileNumber: ['', [Validators.required, Validators.pattern(/^\d{23}$/)]],
     alias: '',
   });
   protected readonly addError = signal<string | null>(null);
 
-  // import active state (bloqueo UI)
+  // import active state (blocks UI)
   protected readonly importActive = signal<ImportActiveResponse | null>(null);
   private importActiveTimer?: ReturnType<typeof setInterval>;
 
@@ -102,13 +102,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadNovelties();
-    this.loadProcesos();
+    this.loadCases();
     this.startImportActivePolling();
 
-    // debounce 300ms en filtros de procesos
+    // 300ms debounce on case filters
     this.filterForm.valueChanges
       .pipe(debounceTime(300), takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.loadProcesos(1));
+      .subscribe(() => this.loadCases(1));
   }
 
   ngOnDestroy(): void {
@@ -123,7 +123,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.importActive.set(res);
           if (res.hasActive && res.importJob?.status === 'completed') {
             this.importActive.set({ hasActive: false, importJob: null });
-            this.loadProcesos(1);
+            this.loadCases(1);
             this.loadNovelties();
           }
         },
@@ -149,8 +149,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  protected loadProcesos(page = this.procesosPage()): void {
-    this.procesosLoading.set(true);
+  protected loadCases(page = this.casesPage()): void {
+    this.casesLoading.set(true);
     const f = this.filterForm.getRawValue();
     this.processes
       .list({
@@ -162,30 +162,30 @@ export class DashboardComponent implements OnInit, OnDestroy {
       })
       .subscribe({
         next: (res) => {
-          this.procesos.set(res.items);
-          this.procesosTotal.set(res.total);
-          this.procesosPage.set(res.page);
-          this.procesosLoading.set(false);
+          this.cases.set(res.items);
+          this.casesTotal.set(res.total);
+          this.casesPage.set(res.page);
+          this.casesLoading.set(false);
         },
-        error: () => this.procesosLoading.set(false),
+        error: () => this.casesLoading.set(false),
       });
   }
 
   protected applyFilters(): void {
-    this.loadProcesos(1);
+    this.loadCases(1);
   }
 
   protected goToPage(page: number): void {
-    if (page < 1 || page > this.procesosTotalPages()) return;
-    this.loadProcesos(page);
+    if (page < 1 || page > this.casesTotalPages()) return;
+    this.loadCases(page);
   }
 
-  protected openAtender(item: ProcessListItem): void {
-    this.openDetail(item.id, 'atender');
+  protected openAttend(item: ProcessListItem): void {
+    this.openDetail(item.id, 'attend');
   }
 
-  protected openOpciones(item: ProcessListItem): void {
-    this.openDetail(item.id, 'opciones');
+  protected openOptions(item: ProcessListItem): void {
+    this.openDetail(item.id, 'options');
   }
 
   private openDetail(id: string, type: ModalType): void {
@@ -222,12 +222,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }, 10000);
   }
 
-  protected openAgregar(): void {
+  protected openAdd(): void {
     if (this.importActive()?.hasActive) return;
     this.addForm.reset({ fileNumber: '', alias: '' });
     this.addError.set(null);
     this.addTab.set('full-number');
-    this.modalType.set('agregar');
+    this.modalType.set('add');
   }
 
   protected closeModal(): void {
@@ -242,13 +242,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (!detail || this.actionPending()) return;
     this.actionPending.set(true);
 
-    // optimistic: drop from novedades immediately
+    // optimistic: drop from novelties immediately
     this.novelties.update((items) => items.filter((p) => p.id !== detail.id));
     this.noveltiesTotal.update((n) => Math.max(0, n - 1));
 
     this.processes.markAttended(detail.id).subscribe({
       next: () => {
-        this.loadProcesos();
+        this.loadCases();
         this.closeModal();
       },
       error: () => {
@@ -265,7 +265,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `proceso-${detail.fileNumber}.pdf`;
+      a.download = `case-${detail.fileNumber}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
       this.closeModal();
@@ -284,8 +284,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       next: () => {
         this.actionPending.set(false);
         this.closeModal();
-        this.activeTab.set('procesos');
-        this.loadProcesos(1);
+        this.activeTab.set('cases');
+        this.loadCases(1);
         this.loadNovelties();
       },
       error: (err: { status?: number }) => {
@@ -297,28 +297,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   protected onWizardCreated(): void {
     this.closeModal();
-    this.activeTab.set('procesos');
-    this.loadProcesos(1);
+    this.activeTab.set('cases');
+    this.loadCases(1);
     this.loadNovelties();
   }
 
   protected onImportCompleted(): void {
     this.closeModal();
-    this.activeTab.set('procesos');
-    this.loadProcesos(1);
+    this.activeTab.set('cases');
+    this.loadCases(1);
     this.loadNovelties();
   }
 
   private addErrorMessage(status?: number): string {
     switch (status) {
       case 409:
-        return 'El proceso ya existe o hay una importación en curso.';
+        return 'The case already exists or an import is currently in progress.';
       case 422:
-        return 'Proceso no encontrado en la Rama Judicial.';
+        return 'Case not found in the Judicial Branch.';
       case 400:
-        return 'Radicado inválido (deben ser 23 dígitos).';
+        return 'Invalid file number (must be 23 digits).';
       default:
-        return 'No se pudo crear el proceso. Intenta de nuevo.';
+        return 'Could not create the case. Please try again.';
     }
   }
 }

@@ -80,7 +80,7 @@ export class Wizard implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        this.error.set('Error cargando departamentos. Intenta de nuevo.');
+        this.error.set('Error loading departments. Please try again.');
         this.loading.set(false);
       },
     });
@@ -98,7 +98,7 @@ export class Wizard implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        this.error.set('Error cargando ciudades.');
+        this.error.set('Error loading cities.');
         this.loading.set(false);
       },
     });
@@ -116,7 +116,7 @@ export class Wizard implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        this.error.set('Error cargando despachos.');
+        this.error.set('Error loading courts.');
         this.loading.set(false);
       },
     });
@@ -139,7 +139,7 @@ export class Wizard implements OnInit {
           this.loading.set(false);
         },
         error: () => {
-          this.error.set('Error cargando despachos.');
+          this.error.set('Error loading courts.');
           this.loading.set(false);
         },
       });
@@ -190,13 +190,13 @@ export class Wizard implements OnInit {
   private errorMessage(status?: number): string {
     switch (status) {
       case 409:
-        return 'El proceso ya existe en tu portafolio.';
+        return 'The case already exists in your portfolio.';
       case 422:
-        return 'No se encontró ese proceso en la Rama Judicial.';
+        return 'That case was not found in the Judicial Branch.';
       case 400:
-        return 'Datos inválidos. Verifica el consecutivo.';
+        return 'Invalid data. Check the consecutive number.';
       default:
-        return 'No se pudo crear el proceso. Intenta de nuevo.';
+        return 'Could not create the case. Please try again.';
     }
   }
 }

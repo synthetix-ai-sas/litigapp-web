@@ -7,13 +7,13 @@ import { Wizard } from '../wizard/wizard';
 type AddTab = 'full-number' | 'wizard' | 'excel';
 
 @Component({
-  selector: 'app-agregar-modal',
+  selector: 'app-add-modal',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [LucideAngularModule, ReactiveFormsModule, Wizard, ProcessImport],
-  templateUrl: './agregar-modal.component.html',
-  styleUrl: './agregar-modal.component.css',
+  templateUrl: './add-modal.component.html',
+  styleUrl: './add-modal.component.css',
 })
-export class AgregarModalComponent {
+export class AddModalComponent {
   addForm = input.required<FormGroup>();
   addError = input<string | null>(null);
   actionPending = input<boolean>(false);
@@ -25,8 +25,8 @@ export class AgregarModalComponent {
 
   protected readonly addTab = signal<AddTab>('full-number');
   protected readonly tabs: { id: AddTab; label: string }[] = [
-    { id: 'full-number', label: 'Número completo' },
-    { id: 'wizard', label: 'Asistente' },
+    { id: 'full-number', label: 'Full number' },
+    { id: 'wizard', label: 'Wizard' },
     { id: 'excel', label: 'Excel' },
   ];
 

@@ -1,28 +1,25 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { Bell, CheckCircle, Clock, LucideAngularModule, TriangleAlert, User, X } from 'lucide-angular';
+import { Download, LucideAngularModule, Scale, TriangleAlert, X } from 'lucide-angular';
 import { ProcessDetail } from '../../../shared/domain/process';
 import { formatDate } from '../../../shared/util/format-date';
 
 @Component({
-  selector: 'app-atender-modal',
+  selector: 'app-options-modal',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [LucideAngularModule],
-  templateUrl: './atender-modal.component.html',
-  styleUrl: './atender-modal.component.css',
+  templateUrl: './options-modal.component.html',
+  styleUrl: './options-modal.component.css',
 })
-export class AtenderModalComponent {
+export class OptionsModalComponent {
   process = input<ProcessDetail | null>(null);
   loading = input<boolean>(false);
-  actionPending = input<boolean>(false);
 
   close = output<void>();
-  markAttended = output<void>();
+  downloadPdf = output<void>();
 
-  protected readonly Bell = Bell;
-  protected readonly CheckCircle = CheckCircle;
-  protected readonly Clock = Clock;
+  protected readonly Download = Download;
+  protected readonly Scale = Scale;
   protected readonly TriangleAlert = TriangleAlert;
-  protected readonly User = User;
   protected readonly X = X;
 
   protected formatDate = formatDate;

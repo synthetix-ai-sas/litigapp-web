@@ -27,16 +27,16 @@ import { formatDate } from '../../../shared/util/format-date';
   styleUrl: './processes-tab.component.css',
 })
 export default class ProcessesTabComponent {
-  procesos = input<ProcessListItem[]>([]);
-  procesosLoading = input<boolean>(false);
-  procesosTotal = input<number>(0);
-  procesosPage = input<number>(1);
-  procesosTotalPages = input<number>(1);
+  cases = input<ProcessListItem[]>([]);
+  casesLoading = input<boolean>(false);
+  casesTotal = input<number>(0);
+  casesPage = input<number>(1);
+  casesTotalPages = input<number>(1);
   filterForm = input.required<FormGroup>();
   importActive = input<ImportActiveResponse | null>(null);
 
-  openOpciones = output<ProcessListItem>();
-  openAgregar = output<void>();
+  openOptions = output<ProcessListItem>();
+  openAdd = output<void>();
   goToPage = output<number>();
   applyFilters = output<void>();
 

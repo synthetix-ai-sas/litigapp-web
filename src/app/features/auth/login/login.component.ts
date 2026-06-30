@@ -58,7 +58,7 @@ export default class LoginComponent {
       await this.router.navigate(['/']);
     } catch (e) {
       this.error.set(
-        e instanceof Error ? e.message : 'Error al iniciar sesión. Intenta de nuevo.',
+        e instanceof Error ? e.message : 'Error logging in. Please try again.',
       );
     } finally {
       this.loading.set(false);

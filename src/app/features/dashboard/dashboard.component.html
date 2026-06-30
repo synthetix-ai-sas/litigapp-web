@@ -6,57 +6,57 @@
     <!-- TABS NAV -->
     <div class="flex items-center justify-between border-b border-slate-200 mb-8">
       <div class="flex">
-        <button (click)="setTab('novedades')"
+        <button (click)="setTab('novelties')"
           class="flex items-center gap-2 px-6 py-3 font-medium text-sm transition-colors relative"
-          [class.text-blue-600]="activeTab() === 'novedades'"
-          [class.text-slate-500]="activeTab() !== 'novedades'">
+          [class.text-blue-600]="activeTab() === 'novelties'"
+          [class.text-slate-500]="activeTab() !== 'novelties'">
           <lucide-icon [img]="Bell" [size]="18" />
-          Novedades
+          Updates
           @if (noveltiesTotal() > 0) {
             <span class="bg-red-100 text-red-600 py-0.5 px-2 rounded-full text-xs font-bold ml-1">{{ noveltiesTotal() }}</span>
           }
-          @if (activeTab() === 'novedades') {
+          @if (activeTab() === 'novelties') {
             <div class="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-t-md"></div>
           }
         </button>
-        <button (click)="setTab('procesos')"
+        <button (click)="setTab('cases')"
           class="flex items-center gap-2 px-6 py-3 font-medium text-sm transition-colors relative"
-          [class.text-blue-600]="activeTab() === 'procesos'"
-          [class.text-slate-500]="activeTab() !== 'procesos'">
+          [class.text-blue-600]="activeTab() === 'cases'"
+          [class.text-slate-500]="activeTab() !== 'cases'">
           <lucide-icon [img]="FileText" [size]="18" />
-          Procesos
-          @if (activeTab() === 'procesos') {
+          Cases
+          @if (activeTab() === 'cases') {
             <div class="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-t-md"></div>
           }
         </button>
       </div>
-      <button (click)="openAgregar()"
+      <button (click)="openAdd()"
         [disabled]="importActive()?.hasActive"
-        [title]="importActive()?.hasActive ? 'Hay una importación en curso. Espera a que termine.' : 'Agregar Proceso'"
+        [title]="importActive()?.hasActive ? 'An import is currently in progress. Wait for it to finish.' : 'Add Case'"
         class="mb-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-3 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors shadow-sm shrink-0">
         <lucide-icon [img]="Plus" [size]="18" />
-        <span class="hidden sm:inline">Agregar Proceso</span>
+        <span class="hidden sm:inline">Add Case</span>
       </button>
     </div>
 
     <!-- TAB CONTENT -->
-    @if (activeTab() === 'novedades') {
+    @if (activeTab() === 'novelties') {
       <app-novelties-tab
         [novelties]="novelties()"
         [loading]="noveltiesLoading()"
-        (atender)="openAtender($event)" />
+        (attend)="openAttend($event)" />
     }
-    @if (activeTab() === 'procesos') {
+    @if (activeTab() === 'cases') {
       <app-processes-tab
-        [procesos]="procesos()"
-        [procesosLoading]="procesosLoading()"
-        [procesosTotal]="procesosTotal()"
-        [procesosPage]="procesosPage()"
-        [procesosTotalPages]="procesosTotalPages()"
+        [cases]="cases()"
+        [casesLoading]="casesLoading()"
+        [casesTotal]="casesTotal()"
+        [casesPage]="casesPage()"
+        [casesTotalPages]="casesTotalPages()"
         [filterForm]="filterForm"
         [importActive]="importActive()"
-        (openOpciones)="openOpciones($event)"
-        (openAgregar)="openAgregar()"
+        (openOptions)="openOptions($event)"
+        (openAdd)="openAdd()"
         (goToPage)="goToPage($event)"
         (applyFilters)="applyFilters()" />
     }
@@ -65,23 +65,23 @@
 <!-- MODALS -->
 @if (modalType() !== null) {
   <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-    @if (modalType() === 'atender') {
-      <app-atender-modal
+    @if (modalType() === 'attend') {
+      <app-attend-modal
         [process]="selected()"
         [loading]="detailLoading()"
         [actionPending]="actionPending()"
         (close)="closeModal()"
         (markAttended)="markAttended()" />
     }
-    @if (modalType() === 'opciones') {
-      <app-opciones-modal
+    @if (modalType() === 'options') {
+      <app-options-modal
         [process]="selected()"
         [loading]="detailLoading()"
         (close)="closeModal()"
         (downloadPdf)="downloadPdf()" />
     }
-    @if (modalType() === 'agregar') {
-      <app-agregar-modal
+    @if (modalType() === 'add') {
+      <app-add-modal
         [addForm]="addForm"
         [addError]="addError()"
         [actionPending]="actionPending()"

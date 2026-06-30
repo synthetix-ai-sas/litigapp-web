@@ -4,10 +4,10 @@
       <div class="flex items-center gap-2 text-amber-800 text-sm">
         <lucide-icon [img]="Upload" [size]="16" class="shrink-0" />
         <span>
-          <strong>Importación en curso:</strong> {{ importJob()!.fileName }} —
-          {{ importJob()!.processedRows }}/{{ importJob()!.totalRows }} filas procesadas
+          <strong>Import in progress:</strong> {{ importJob()!.fileName }} —
+          {{ importJob()!.processedRows }}/{{ importJob()!.totalRows }} rows processed
           @if (importJob()!.status === 'paused') {
-            <span class="ml-1 text-amber-600">(pausado por WAF)</span>
+            <span class="ml-1 text-amber-600">(paused by WAF)</span>
           }
         </span>
       </div>
