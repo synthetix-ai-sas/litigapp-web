@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   EventEmitter,
   OnDestroy,
   Output,
@@ -179,7 +178,6 @@ export class ProcessImport implements OnDestroy {
   }
 
   protected columnLabel(col: string): string {
-    const i = col.charCodeAt(0) - 65;
     return `Columna ${col}`;
   }
 }
