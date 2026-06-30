@@ -32,7 +32,7 @@ export class AuthService {
       const tokens = await firstValueFrom(this.authData.login({ email, password }));
       this._applySession(tokens);
     } catch (err) {
-      throw this._toError(err, 'Error logging in. Please try again.');
+      throw this._toError(err, 'Error al iniciar sesión. Por favor intenta de nuevo.');
     }
   }
 
@@ -41,7 +41,7 @@ export class AuthService {
       const tokens = await firstValueFrom(this.authData.register({ fullName, email, password }));
       this._applySession(tokens);
     } catch (err) {
-      throw this._toError(err, 'Error creating the account. Please try again.');
+      throw this._toError(err, 'Error al crear la cuenta. Por favor intenta de nuevo.');
     }
   }
 

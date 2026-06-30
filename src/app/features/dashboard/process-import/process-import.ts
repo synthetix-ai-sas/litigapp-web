@@ -91,7 +91,7 @@ export class ProcessImport implements OnDestroy {
 
   private setFile(file: File): void {
     if (!file.name.match(/\.(xlsx|xls|csv)$/i)) {
-      this.error.set('Only .xlsx, .xls, or .csv files are accepted');
+      this.error.set('Solo se aceptan archivos .xlsx, .xls o .csv');
       return;
     }
     this.error.set(null);
@@ -111,7 +111,7 @@ export class ProcessImport implements OnDestroy {
       },
       error: () => {
         this.uploading.set(false);
-        this.error.set('Could not process the file. Make sure it is a valid Excel file.');
+        this.error.set('No se pudo procesar el archivo. Asegúrate de que sea un Excel válido.');
       },
     });
   }
@@ -149,7 +149,7 @@ export class ProcessImport implements OnDestroy {
         },
         error: () => {
           this.submitting.set(false);
-          this.error.set('Could not start the import. Please try again.');
+          this.error.set('No se pudo iniciar la importación. Por favor intenta de nuevo.');
         },
       });
   }

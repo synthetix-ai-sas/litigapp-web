@@ -312,13 +312,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private addErrorMessage(status?: number): string {
     switch (status) {
       case 409:
-        return 'The case already exists or an import is currently in progress.';
+        return 'El proceso ya existe o hay una importación en curso.';
       case 422:
-        return 'Case not found in the Judicial Branch.';
+        return 'Proceso no encontrado en la Rama Judicial.';
       case 400:
-        return 'Invalid file number (must be 23 digits).';
+        return 'Número de radicado inválido (debe tener 23 dígitos).';
       default:
-        return 'Could not create the case. Please try again.';
+        return 'No se pudo crear el proceso. Por favor intenta de nuevo.';
     }
   }
 }
