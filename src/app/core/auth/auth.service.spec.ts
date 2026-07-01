@@ -134,7 +134,7 @@ describe('AuthService', () => {
       authData.login.and.returnValue(throwError(() => httpError));
 
       await expectAsync(service.login('a@b.co', 'pw')).toBeRejectedWithError(
-        'Error logging in. Please try again.',
+        'Error al iniciar sesión. Por favor intenta de nuevo.',
       );
     });
 
