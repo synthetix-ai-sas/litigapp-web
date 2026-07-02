@@ -3,8 +3,9 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
+    "start": "node scripts/set-env.js && ng serve",
+    "build": "node scripts/set-env.js && ng build",
+    "set-env": "node scripts/set-env.js",
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false --browsers ChromeHeadless",
     "lint": "eslint src",

@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { TokenStorageService } from './token-storage.service';
 import type { User } from '../../shared/domain/user.types';
 
-const ALICE: User = { id: 'u1', email: 'alice@law.co', fullName: 'Alice Pérez' };
+const ALICE: User = { id: 'u1', email: 'alice@law.co', fullName: 'Alice Smith' };
 
 describe('TokenStorageService', () => {
   let service: TokenStorageService;

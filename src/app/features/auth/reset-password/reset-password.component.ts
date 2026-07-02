@@ -94,7 +94,7 @@ export default class ResetPasswordComponent implements OnInit {
       if (err instanceof HttpErrorResponse && err.status === 400) {
         this.state.set('invalid-link');
       } else {
-        this.error.set('Error al restablecer la contraseña. Intenta de nuevo.');
+        this.error.set('Error al restablecer la contraseña. Por favor intenta de nuevo.');
       }
     } finally {
       this.loading.set(false);

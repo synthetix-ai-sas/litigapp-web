@@ -17,7 +17,7 @@ function makeTokens(payload: Record<string, unknown>, rt = 'rt-1'): AuthTokensDt
   return { accessToken: makeJwt(payload), refreshToken: rt, expiresInSeconds: 900 };
 }
 
-const ALICE: User = { id: 'u1', email: 'alice@law.co', fullName: 'Alice Pérez' };
+const ALICE: User = { id: 'u1', email: 'alice@law.co', fullName: 'Alice Smith' };
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -86,7 +86,7 @@ describe('AuthService', () => {
 
   describe('login()', () => {
     it('sets authenticated and saves session after success', async () => {
-      const tokens = makeTokens({ sub: 'u1', email: 'alice@law.co', fullName: 'Alice Pérez' });
+      const tokens = makeTokens({ sub: 'u1', email: 'alice@law.co', fullName: 'Alice Smith' });
       authData.login.and.returnValue(of(tokens));
 
       await service.login('alice@law.co', 'secret');
@@ -121,11 +121,11 @@ describe('AuthService', () => {
     it('throws with the detail message from a 401 ProblemDetails response', async () => {
       const httpError = new HttpErrorResponse({
         status: 401,
-        error: { title: 'Authentication failed.', detail: 'Credenciales inválidas' },
+        error: { title: 'Authentication failed.', detail: 'Invalid credentials' },
       });
       authData.login.and.returnValue(throwError(() => httpError));
 
-      await expectAsync(service.login('a@b.co', 'wrong')).toBeRejectedWithError('Credenciales inválidas');
+      await expectAsync(service.login('a@b.co', 'wrong')).toBeRejectedWithError('Invalid credentials');
       expect(service.isAuthenticated()).toBeFalse();
     });
 
@@ -134,7 +134,7 @@ describe('AuthService', () => {
       authData.login.and.returnValue(throwError(() => httpError));
 
       await expectAsync(service.login('a@b.co', 'pw')).toBeRejectedWithError(
-        'Error al iniciar sesión. Intenta de nuevo.',
+        'Error al iniciar sesión. Por favor intenta de nuevo.',
       );
     });
 
@@ -154,10 +154,10 @@ describe('AuthService', () => {
 
   describe('register()', () => {
     it('applies session directly from the tokens returned by register (no second login call)', async () => {
-      const tokens = makeTokens({ sub: 'u5', email: 'new@law.co', fullName: 'Nuevo' });
+      const tokens = makeTokens({ sub: 'u5', email: 'new@law.co', fullName: 'New User' });
       authData.register.and.returnValue(of(tokens));
 
-      await service.register('Nuevo', 'new@law.co', 'Password1');
+      await service.register('New User', 'new@law.co', 'Password1');
 
       expect(service.isAuthenticated()).toBeTrue();
       expect(service.currentUser()?.email).toBe('new@law.co');
@@ -167,12 +167,12 @@ describe('AuthService', () => {
     it('throws when registration returns an HTTP error', async () => {
       const httpError = new HttpErrorResponse({
         status: 409,
-        error: { detail: 'El correo ya está registrado' },
+        error: { detail: 'Email is already registered' },
       });
       authData.register.and.returnValue(throwError(() => httpError));
 
       await expectAsync(service.register('X', 'taken@law.co', 'pass')).toBeRejectedWithError(
-        'El correo ya está registrado',
+        'Email is already registered',
       );
     });
   });
