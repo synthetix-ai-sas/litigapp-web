@@ -1,26 +1,19 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
-  OnDestroy,
-  Output,
+  OutputEmitterRef,
   inject,
+  output,
   signal,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import {
-  CheckCircle,
-  FileSpreadsheet,
-  LucideAngularModule,
-  TriangleAlert,
-  Upload,
-  X,
-} from 'lucide-angular';
+import { FileSpreadsheet, LucideAngularModule, TriangleAlert, Upload } from 'lucide-angular';
 
+import { ImportProgressService } from '../../../core/import-progress/import-progress.service';
 import { ImportsService } from '../../../data-access/imports.service';
-import { FileNumberMode, ImportJob, ImportPreview } from '../../../shared/domain/import';
+import { ImportPreview } from '../../../shared/domain/import';
 
-type ImportStep = 'upload' | 'mapping' | 'progress';
+type ImportStep = 'upload' | 'mapping';
 
 @Component({
   selector: 'app-process-import',
@@ -28,17 +21,16 @@ type ImportStep = 'upload' | 'mapping' | 'progress';
   imports: [ReactiveFormsModule, LucideAngularModule],
   templateUrl: './process-import.html',
 })
-export class ProcessImport implements OnDestroy {
-  @Output() completed = new EventEmitter<void>();
-  @Output() cancelled = new EventEmitter<void>();
+export class ProcessImport {
+  readonly completed: OutputEmitterRef<void> = output<void>();
+  readonly cancelled: OutputEmitterRef<void> = output<void>();
 
   protected readonly Upload = Upload;
   protected readonly FileSpreadsheet = FileSpreadsheet;
-  protected readonly CheckCircle = CheckCircle;
   protected readonly TriangleAlert = TriangleAlert;
-  protected readonly X = X;
 
   private readonly imports = inject(ImportsService);
+  private readonly importProgress = inject(ImportProgressService);
   private readonly fb = inject(FormBuilder);
 
   protected readonly step = signal<ImportStep>('upload');
@@ -46,27 +38,14 @@ export class ProcessImport implements OnDestroy {
   protected readonly selectedFile = signal<File | null>(null);
   protected readonly uploading = signal(false);
   protected readonly submitting = signal(false);
-  protected readonly fileNumberMode = signal<FileNumberMode>('full');
-  protected readonly importJob = signal<ImportJob | null>(null);
   protected readonly error = signal<string | null>(null);
   protected readonly dragOver = signal(false);
 
+  /** v1: radicado (required) + notas/alias (optional) */
   protected readonly mappingForm = this.fb.nonNullable.group({
     fileNumberColumn: ['', Validators.required],
-    filingYearColumn: '',
-    cityColumn: '',
-    courtColumn: '',
-    consecutiveColumn: '',
-    demandantColumn: '',
-    demandadoColumn: '',
-    aliasColumn: '',
+    notesColumn: '',
   });
-
-  private pollingTimer?: ReturnType<typeof setInterval>;
-
-  ngOnDestroy(): void {
-    clearInterval(this.pollingTimer);
-  }
 
   protected onDragOver(event: DragEvent): void {
     event.preventDefault();
@@ -90,8 +69,8 @@ export class ProcessImport implements OnDestroy {
   }
 
   private setFile(file: File): void {
-    if (!file.name.match(/\.(xlsx|xls|csv)$/i)) {
-      this.error.set('Solo se aceptan archivos .xlsx, .xls o .csv');
+    if (!file.name.match(/\.(xlsx|xls)$/i)) {
+      this.error.set('Solo se aceptan archivos .xlsx o .xls');
       return;
     }
     this.error.set(null);
@@ -104,10 +83,11 @@ export class ProcessImport implements OnDestroy {
     this.uploading.set(true);
     this.error.set(null);
     this.imports.preview(file).subscribe({
-      next: (preview) => {
-        this.preview.set(preview);
+      next: (prev) => {
+        this.preview.set(prev);
         this.uploading.set(false);
         this.step.set('mapping');
+        this.mappingForm.reset({ fileNumberColumn: '', notesColumn: '' });
       },
       error: () => {
         this.uploading.set(false);
@@ -121,63 +101,37 @@ export class ProcessImport implements OnDestroy {
       this.mappingForm.markAllAsTouched();
       return;
     }
-    const p = this.preview();
-    if (!p) return;
+    const prev = this.preview();
+    if (!prev) return;
+
     this.submitting.set(true);
     this.error.set(null);
-    const raw = this.mappingForm.getRawValue();
+    const { fileNumberColumn, notesColumn } = this.mappingForm.getRawValue();
+
     this.imports
-      .execute(
-        p.previewId,
-        {
-          fileNumberColumn: raw.fileNumberColumn || null,
-          filingYearColumn: raw.filingYearColumn || null,
-          cityColumn: raw.cityColumn || null,
-          courtColumn: raw.courtColumn || null,
-          consecutiveColumn: raw.consecutiveColumn || null,
-          demandantColumn: raw.demandantColumn || null,
-          demandadoColumn: raw.demandadoColumn || null,
-          aliasColumn: raw.aliasColumn || null,
-        },
-        this.fileNumberMode(),
-      )
+      .execute(prev.previewId, {
+        fileNumberColumn: fileNumberColumn || null,
+        notesColumn: notesColumn || null,
+        // v2 compose fields — always null in v1
+        filingYearColumn: null,
+        cityColumn: null,
+        courtColumn: null,
+        consecutiveColumn: null,
+        demandantColumn: null,
+        demandadoColumn: null,
+        aliasColumn: null,
+      })
       .subscribe({
-        next: ({ importJobId }) => {
+        next: () => {
           this.submitting.set(false);
-          this.step.set('progress');
-          this.startPolling(importJobId);
+          // Delegate all polling and state to the singleton service.
+          this.importProgress.startTracking();
+          this.completed.emit();
         },
         error: () => {
           this.submitting.set(false);
           this.error.set('No se pudo iniciar la importación. Por favor intenta de nuevo.');
         },
       });
-  }
-
-  private startPolling(jobId: string): void {
-    this.pollingTimer = setInterval(() => {
-      this.imports.getById(jobId).subscribe({
-        next: (job) => {
-          this.importJob.set(job);
-          if (job.status === 'completed' || job.status === 'failed') {
-            clearInterval(this.pollingTimer);
-            if (job.status === 'completed') {
-              setTimeout(() => this.completed.emit(), 1500);
-            }
-          }
-        },
-        error: () => {},
-      });
-    }, 3000);
-  }
-
-  protected get progressPct(): number {
-    const job = this.importJob();
-    if (!job || job.totalRows === 0) return 0;
-    return Math.round((job.processedRows / job.totalRows) * 100);
-  }
-
-  protected columnLabel(col: string): string {
-    return `Column ${col}`;
   }
 }

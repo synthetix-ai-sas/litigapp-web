@@ -2471,7 +2471,13 @@ Crear `Directory.Build.props` con:
    (notificación extra-app, sirve si cerró el navegador).
 ```
 
-**Implementación del banner** (Angular): servicio singleton `ImportProgressService` con un signal `activeImport = signal<ImportJobStatus | null>(null)`. Al cargar el dashboard se llama `/imports/active` una vez para hidratar el signal. Si hay job activo arranca el polling. El componente `<global-import-banner>` se renderiza condicionalmente en `dashboard.component.html` justo bajo el header.
+**Implementación del banner** (Angular): servicio singleton `ImportProgressService` con un signal `activeImport = signal<ImportJobStatus | null>(null)`.
+
+**Polling — reglas estrictas (NO ocioso):**
+- El polling a `GET /imports/active` **solo arranca cuando el usuario inicia un import** (tras `POST /imports` exitoso, usando el `importJobId` devuelto).
+- Se **auto-detiene** apenas la respuesta trae `status='completed'` o `'failed'` (o ante error de red) — hacer `clearInterval`/completar el stream ahí mismo. Jamás un `setInterval` perpetuo atado solo a `ngOnDestroy`.
+- En estado idle (sin import en curso) el dashboard **NO llama** `/imports/active`. **Cero polling de fondo.** El caso "el usuario cerró la app durante el import" lo cubre el **email** de finalización, no un polling permanente.
+- La lógica de polling vive en el `ImportProgressService`, **no** en `dashboard.component` (que solo lee el signal). El componente `<global-import-banner>` se renderiza condicionalmente en `dashboard.component.html` (bajo el header) leyendo ese signal.
 
 **Bloqueo en el backend (defensa en profundidad)**: aunque el frontend deshabilita el botón, los endpoints `POST /processes/full-number` y `/wizard` también validan que no haya import activo del usuario → devuelven 409 con `error.code='IMPORT_IN_PROGRESS'` si alguien intenta llamar la API directamente (curl, Postman, segunda pestaña abierta). Esto evita race conditions y mal uso.
 
@@ -2614,7 +2620,8 @@ providers: [provideZonelessChangeDetection(), ...]
 
 1. `AddProcessDialogComponent` con 2 tabs (manual / excel).
 2. `WizardComponent` con stepper: depto → ciudad → despacho → consecutivo.
-3. `ImportUploadStepComponent` → `MappingStepComponent` → `ProgressTrackerComponent` (polling).
+3. Import flow (v1 implementado): `ProcessImport` con 2 pasos — upload + mapping de solo 2 columnas (`fileNumberColumn` requerido, `notesColumn` opcional). Sin `ProgressTrackerComponent` local: al confirmar, se llama `ImportProgressService.startTracking()` y el modal se cierra. El progreso vive en el banner global.
+4. `ImportProgressService` (singleton en `core/`) expone dos signals: `activeImport` (banner/bloqueo de botón) y `completedJob` (dispara el popup de resumen `ImportCompleteDialogComponent`). El polling solo corre tras `startTracking()` y se auto-detiene en `completed`/`failed`. Zero polling en idle.
 
 ### Step 18: Capacitor — empaque mobile
 

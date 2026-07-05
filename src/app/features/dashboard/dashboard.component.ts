@@ -14,13 +14,13 @@ import { Router } from '@angular/router';
 import { Bell, FileText, LucideAngularModule, Plus } from 'lucide-angular';
 import { debounceTime } from 'rxjs';
 
-import { ImportsService } from '../../data-access/imports.service';
+import { ImportProgressService } from '../../core/import-progress/import-progress.service';
 import { ProcessesService } from '../../data-access/processes.service';
-import { ImportActiveResponse } from '../../shared/domain/import';
 import { ProcessDetail, ProcessListItem } from '../../shared/domain/process';
 import { AddModalComponent } from './add-modal/add-modal.component';
 import { AttendModalComponent } from './attend-modal/attend-modal.component';
 import { ImportBannerComponent } from './import-banner/import-banner.component';
+import { ImportCompleteDialogComponent } from './import-complete-dialog/import-complete-dialog.component';
 import NoveltiesTabComponent from './novelties-tab/novelties-tab.component';
 import { OptionsModalComponent } from './options-modal/options-modal.component';
 import ProcessesTabComponent from './processes-tab/processes-tab.component';
@@ -37,6 +37,7 @@ const PAGE_SIZE = 20;
     ReactiveFormsModule,
     LucideAngularModule,
     ImportBannerComponent,
+    ImportCompleteDialogComponent,
     NoveltiesTabComponent,
     ProcessesTabComponent,
     AttendModalComponent,
@@ -47,10 +48,11 @@ const PAGE_SIZE = 20;
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   private readonly processes = inject(ProcessesService);
-  private readonly importsService = inject(ImportsService);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
+
+  protected readonly importProgress = inject(ImportProgressService);
 
   // icons
   protected readonly Bell = Bell;
@@ -93,17 +95,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   });
   protected readonly addError = signal<string | null>(null);
 
-  // import active state (blocks UI)
-  protected readonly importActive = signal<ImportActiveResponse | null>(null);
-  private importActiveTimer?: ReturnType<typeof setInterval>;
-
   // partial sync polling (detail dialog)
   private syncPollingTimer?: ReturnType<typeof setInterval>;
 
   ngOnInit(): void {
     this.loadNovelties();
     this.loadCases();
-    this.startImportActivePolling();
 
     // 300ms debounce on case filters
     this.filterForm.valueChanges
@@ -112,25 +109,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    clearInterval(this.importActiveTimer);
     clearInterval(this.syncPollingTimer);
-  }
-
-  private startImportActivePolling(): void {
-    const poll = () =>
-      this.importsService.getActive().subscribe({
-        next: (res) => {
-          this.importActive.set(res);
-          if (res.hasActive && res.importJob?.status === 'completed') {
-            this.importActive.set({ hasActive: false, importJob: null });
-            this.loadCases(1);
-            this.loadNovelties();
-          }
-        },
-        error: () => {},
-      });
-    poll();
-    this.importActiveTimer = setInterval(poll, 3000);
   }
 
   protected setTab(tab: Tab): void {
@@ -223,7 +202,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   protected openAdd(): void {
-    if (this.importActive()?.hasActive) return;
+    if (this.importProgress.activeImport() !== null) return;
     this.addForm.reset({ fileNumber: '', alias: '' });
     this.addError.set(null);
     this.addTab.set('full-number');
@@ -302,11 +281,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadNovelties();
   }
 
-  protected onImportCompleted(): void {
+  /** Called when user confirms mapping and POST /imports succeeds. Banner + polling take over. */
+  protected onImportStarted(): void {
     this.closeModal();
+  }
+
+  /** Called from ImportCompleteDialogComponent when user clicks "Ver mis procesos". */
+  protected onImportCompleteViewProcesses(): void {
     this.activeTab.set('cases');
     this.loadCases(1);
     this.loadNovelties();
+  }
+
+  /** Called from ImportCompleteDialogComponent when user dismisses the popup. */
+  protected onImportCompleteDismissed(): void {
+    // No navigation — user closed without clicking "Ver mis procesos".
   }
 
   private addErrorMessage(status?: number): string {
