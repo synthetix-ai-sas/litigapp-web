@@ -24,11 +24,16 @@ export interface ImportActiveResponse {
   importJob: ImportJob | null;
 }
 
+export interface ImportColumn {
+  key: string;
+  header: string;
+}
+
 export interface ImportPreview {
   previewId: string;
-  columns: string[];
-  rowCount: number;
-  previewRows: Record<string, string>[];
+  columns: ImportColumn[];
+  rows: Record<string, string>[];
+  totalRows: number;
 }
 
 /** v1 mapping: only radicado (required) + notes/alias (optional). All other fields null. */

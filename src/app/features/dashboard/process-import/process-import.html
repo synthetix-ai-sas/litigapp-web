@@ -58,28 +58,28 @@
         <!-- File summary -->
         <div class="bg-slate-50 rounded-lg border border-slate-200 p-3 text-sm">
           <p class="font-medium text-slate-700">
-            <strong class="text-blue-700">{{ p.rowCount }} filas</strong> detectadas en el archivo
+            <strong class="text-blue-700">{{ p.totalRows }} filas</strong> detectadas en el archivo
           </p>
-          <p class="text-slate-500 text-xs mt-0.5">Columnas disponibles: {{ p.columns.join(', ') }}</p>
+          <p class="text-slate-500 text-xs mt-0.5">Columnas disponibles: {{ headerList(p.columns) }}</p>
         </div>
 
         <!-- Preview table -->
-        @if (p.previewRows.length > 0) {
+        @if (p.rows.length > 0) {
           <div class="overflow-x-auto rounded-lg border border-slate-200 max-h-36">
             <table class="text-xs w-full">
               <thead class="bg-slate-100 sticky top-0">
                 <tr>
-                  @for (col of p.columns; track col) {
-                    <th class="px-3 py-2 text-left font-semibold text-slate-600 whitespace-nowrap">{{ col }}</th>
+                  @for (col of p.columns; track col.key) {
+                    <th class="px-3 py-2 text-left font-semibold text-slate-600 whitespace-nowrap">{{ col.header }}</th>
                   }
                 </tr>
               </thead>
               <tbody>
-                @for (row of p.previewRows; track $index) {
+                @for (row of p.rows; track $index) {
                   <tr class="border-t border-slate-100 hover:bg-slate-50">
-                    @for (col of p.columns; track col) {
-                      <td class="px-3 py-1.5 text-slate-700 whitespace-nowrap max-w-[140px] truncate" [title]="row[col]">
-                        {{ row[col] || '—' }}
+                    @for (col of p.columns; track col.key) {
+                      <td class="px-3 py-1.5 text-slate-700 whitespace-nowrap max-w-[140px] truncate" [title]="row[col.key]">
+                        {{ row[col.key] || '—' }}
                       </td>
                     }
                   </tr>
@@ -106,8 +106,8 @@
                 [class.border-slate-300]="!(mappingForm.controls.fileNumberColumn.invalid && mappingForm.controls.fileNumberColumn.touched)"
               >
                 <option value="">-- Selecciona columna --</option>
-                @for (col of p.columns; track col) {
-                  <option [value]="col">{{ col }}</option>
+                @for (col of p.columns; track col.key) {
+                  <option [value]="col.key">{{ col.header }}</option>
                 }
               </select>
               @if (mappingForm.controls.fileNumberColumn.invalid && mappingForm.controls.fileNumberColumn.touched) {
@@ -126,8 +126,8 @@
                 class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none appearance-none bg-white text-sm"
               >
                 <option value="">— Sin notas —</option>
-                @for (col of p.columns; track col) {
-                  <option [value]="col">{{ col }}</option>
+                @for (col of p.columns; track col.key) {
+                  <option [value]="col.key">{{ col.header }}</option>
                 }
               </select>
             </div>

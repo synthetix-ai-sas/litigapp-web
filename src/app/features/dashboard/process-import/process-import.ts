@@ -11,7 +11,7 @@ import { FileSpreadsheet, LucideAngularModule, TriangleAlert, Upload } from 'luc
 
 import { ImportProgressService } from '../../../core/import-progress/import-progress.service';
 import { ImportsService } from '../../../data-access/imports.service';
-import { ImportPreview } from '../../../shared/domain/import';
+import { ImportColumn, ImportPreview } from '../../../shared/domain/import';
 
 type ImportStep = 'upload' | 'mapping';
 
@@ -46,6 +46,10 @@ export class ProcessImport {
     fileNumberColumn: ['', Validators.required],
     notesColumn: '',
   });
+
+  protected headerList(columns: ImportColumn[]): string {
+    return columns.map((c) => c.header).join(', ');
+  }
 
   protected onDragOver(event: DragEvent): void {
     event.preventDefault();
