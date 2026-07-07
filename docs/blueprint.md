@@ -925,6 +925,8 @@ Convenciones:
 - Base path: `/api/v1`
 - Auth: JWT Bearer en `Authorization: Bearer <token>` para todo excepto `/auth/*` y `/health`. Aplicar con `.RequireAuthorization()` en el `MapGroup`.
 - Paginación: `?page=1&pageSize=20` con respuesta `{ items, total, page, pageSize, totalPages }`
+- **Sin envelope**: las respuestas exitosas devuelven el DTO/recurso **directamente** (o `{ items, total, ... }` en listados); los errores usan **ProblemDetails**. ⚠️ Algunos ejemplos JSON de esta sección todavía muestran un sobre `{ "data": ..., "error": null }` — ese sobre está **DESACTUALIZADO, no se implementa; ignorarlo**. El backend real no lo usa (usa ProblemDetails para errores).
+- **Nombres consistentes**: usar `totalRows` (no `rowCount`) para conteos de filas, alineado con `import_jobs` y los estados de job.
 
 **Patrón de endpoint** (ejemplo):
 
@@ -1179,15 +1181,16 @@ file=@portafolio.xlsx
 
 ```json
 {
-  "data": {
-    "previewId": "tmp-uuid-cached-10min",
-    "columns": ["A: Radicado", "B: Juzgado", "C: Cliente", "D: Estado"],
-    "rowCount": 87,
-    "previewRows": [
-      { "A": "17001...", "B": "Juzgado 1 Civil...", "C": "...", "D": "..." }
-    ]
-  },
-  "error": null
+  "previewId": "tmp-uuid-cached-10min",
+  "columns": [
+    { "key": "A", "header": "DEPENDENCIA" },
+    { "key": "B", "header": "NUMERO DE PROCESO" },
+    { "key": "F", "header": "JUZGADO/CIUDAD" }
+  ],
+  "rows": [
+    { "A": "PROMISCUOS", "B": "17873408900120240056300", "F": "Juzgado 01 Promiscuo Municipal - Caldas - Villamaría" }
+  ],
+  "totalRows": 51
 }
 ```
 
@@ -2398,7 +2401,7 @@ Crear `Directory.Build.props` con:
 - **Validación en el controller** ANTES de leer con ClosedXML:
   - `[RequestSizeLimit(2 * 1024 * 1024)]` en el endpoint multipart.
   - Si excede tamaño → 413 Payload Too Large.
-- **Validación tras parse**: si `rowCount > MaxRows` → 422 con `error.code='TOO_MANY_ROWS'`.
+- **Validación tras parse**: si `totalRows > MaxRows` → 422 con ProblemDetails (`code='TOO_MANY_ROWS'`).
 - Rationale: ClosedXML carga el DOM completo en memoria. 2MB + 5000 filas cubre el 99.99% de portafolios reales de un abogado individual.
 - **Si en producción real vemos OOMs**: migrar a `ExcelDataReader` (streaming, más eficiente, API menos amigable). Documentado pero NO se hace en MVP.
 
@@ -2620,8 +2623,7 @@ providers: [provideZonelessChangeDetection(), ...]
 
 1. `AddProcessDialogComponent` con 2 tabs (manual / excel).
 2. `WizardComponent` con stepper: depto → ciudad → despacho → consecutivo.
-3. Import flow (v1 implementado): `ProcessImport` con 2 pasos — upload + mapping de solo 2 columnas (`fileNumberColumn` requerido, `notesColumn` opcional). Sin `ProgressTrackerComponent` local: al confirmar, se llama `ImportProgressService.startTracking()` y el modal se cierra. El progreso vive en el banner global.
-4. `ImportProgressService` (singleton en `core/`) expone dos signals: `activeImport` (banner/bloqueo de botón) y `completedJob` (dispara el popup de resumen `ImportCompleteDialogComponent`). El polling solo corre tras `startTracking()` y se auto-detiene en `completed`/`failed`. Zero polling en idle.
+3. `ImportUploadStepComponent` → `MappingStepComponent` → `ProgressTrackerComponent` (polling).
 
 ### Step 18: Capacitor — empaque mobile
 
