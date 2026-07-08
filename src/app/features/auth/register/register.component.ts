@@ -39,6 +39,7 @@ export default class RegisterComponent {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required]],
+      acceptedTerms: [false, [Validators.requiredTrue]],
     },
     { validators: passwordsMatch },
   );
@@ -56,6 +57,10 @@ export default class RegisterComponent {
     );
   }
 
+  get termsNotAccepted(): boolean {
+    return !this.form.get('acceptedTerms')?.value;
+  }
+
   async onSubmit(): Promise<void> {
     this.form.markAllAsTouched();
     if (this.form.invalid || this.loading()) return;
@@ -63,14 +68,17 @@ export default class RegisterComponent {
     this.loading.set(true);
     this.error.set(null);
 
-    const { fullName, email, password } = this.form.value;
+    const { fullName, email, password, acceptedTerms } = this.form.value;
 
     try {
-      await this.auth.register(fullName!, email!, password!);
+      await this.auth.register(fullName!, email!, password!, !!acceptedTerms, !!acceptedTerms);
       await this.router.navigate(['/']);
     } catch (e) {
+      const msg = e instanceof Error ? e.message : '';
       this.error.set(
-        e instanceof Error ? e.message : 'Error al crear la cuenta. Intenta de nuevo.',
+        msg.includes('LEGAL_NOT_ACCEPTED')
+          ? 'Debes aceptar los Términos y la Política de Tratamiento de Datos para continuar.'
+          : (msg || 'Error al crear la cuenta. Intenta de nuevo.'),
       );
     } finally {
       this.loading.set(false);
