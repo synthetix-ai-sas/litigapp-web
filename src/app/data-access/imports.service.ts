@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 
 import { AppConfig } from '../core/config/app-config';
 import {
+  ExecuteImportResponse,
   ImportActiveResponse,
   ImportJob,
   ImportMapping,
@@ -21,12 +22,15 @@ export class ImportsService {
     return this.http.post<ImportPreview>(`${this.base}/preview`, form);
   }
 
-  /** v1: radicado-first — fileNumberMode is always 'full'. */
-  execute(previewId: string, mapping: ImportMapping): Observable<{ importJobId: string }> {
-    return this.http.post<{ importJobId: string }>(this.base, {
+  execute(
+    previewId: string,
+    mapping: ImportMapping,
+    fileName?: string,
+  ): Observable<ExecuteImportResponse> {
+    return this.http.post<ExecuteImportResponse>(this.base, {
       previewId,
       mapping,
-      fileNumberMode: 'full',
+      fileName: fileName ?? null,
     });
   }
 
@@ -36,10 +40,5 @@ export class ImportsService {
 
   getActive(): Observable<ImportActiveResponse> {
     return this.http.get<ImportActiveResponse>(`${this.base}/active`);
-  }
-
-  /** Download errors as CSV blob for the completion popup. */
-  downloadErrorsCsv(jobId: string): Observable<Blob> {
-    return this.http.get(`${this.base}/${jobId}/errors`, { responseType: 'blob' });
   }
 }

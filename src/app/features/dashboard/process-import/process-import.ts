@@ -41,14 +41,14 @@ export class ProcessImport {
   protected readonly error = signal<string | null>(null);
   protected readonly dragOver = signal(false);
 
-  /** v1: radicado (required) + notas/alias (optional) */
+  /** v1: radicado (required) + notas (optional) — matches backend ColumnMappingRequest. */
   protected readonly mappingForm = this.fb.nonNullable.group({
-    fileNumberColumn: ['', Validators.required],
-    notesColumn: '',
+    radicadoCol: ['', Validators.required],
+    notesCol: '',
   });
 
   protected headerList(columns: ImportColumn[]): string {
-    return columns.map((c) => c.header).join(', ');
+    return columns.map((c) => c.header ?? '(sin nombre)').join(', ');
   }
 
   protected onDragOver(event: DragEvent): void {
@@ -91,7 +91,7 @@ export class ProcessImport {
         this.preview.set(prev);
         this.uploading.set(false);
         this.step.set('mapping');
-        this.mappingForm.reset({ fileNumberColumn: '', notesColumn: '' });
+        this.mappingForm.reset({ radicadoCol: '', notesCol: '' });
       },
       error: () => {
         this.uploading.set(false);
@@ -110,21 +110,15 @@ export class ProcessImport {
 
     this.submitting.set(true);
     this.error.set(null);
-    const { fileNumberColumn, notesColumn } = this.mappingForm.getRawValue();
+    const { radicadoCol, notesCol } = this.mappingForm.getRawValue();
+    const file = this.selectedFile();
 
     this.imports
-      .execute(prev.previewId, {
-        fileNumberColumn: fileNumberColumn || null,
-        notesColumn: notesColumn || null,
-        // v2 compose fields — always null in v1
-        filingYearColumn: null,
-        cityColumn: null,
-        courtColumn: null,
-        consecutiveColumn: null,
-        demandantColumn: null,
-        demandadoColumn: null,
-        aliasColumn: null,
-      })
+      .execute(
+        prev.previewId,
+        { radicadoCol, notesCol: notesCol || null },
+        file?.name,
+      )
       .subscribe({
         next: () => {
           this.submitting.set(false);
