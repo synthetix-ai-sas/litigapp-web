@@ -10,6 +10,7 @@ import { Bell, LogOut, LucideAngularModule, Scale } from 'lucide-angular';
 })
 export class AppHeaderComponent {
   noveltiesCount = input<number>(0);
+  userInitials = input<string>('?');
   logout = output<void>();
 
   protected readonly Scale = Scale;

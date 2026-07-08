@@ -16,6 +16,7 @@ export class AppShellComponent implements OnInit, OnDestroy {
   private readonly noveltiesCount = inject(NoveltiesCountService);
 
   protected readonly count = this.noveltiesCount.count;
+  protected readonly userInitials = this.auth.userInitials;
 
   ngOnInit(): void {
     this.noveltiesCount.startPolling();
