@@ -1,4 +1,15 @@
-<div class="min-h-screen bg-slate-50 text-slate-800">
+<div class="min-h-screen flex flex-col bg-slate-50 text-slate-800">
   <app-header [noveltiesCount]="count()" (logout)="logout()" />
-  <router-outlet />
+  <main class="flex-1">
+    <router-outlet />
+  </main>
+  <footer class="border-t border-slate-200 py-4">
+    <div class="max-w-7xl mx-auto px-4 flex items-center justify-center gap-4 text-xs text-slate-400">
+      <a href="/legal/terminos" target="_blank" rel="noopener"
+         class="hover:text-slate-600 transition-colors">Términos y Condiciones</a>
+      <span aria-hidden="true">&middot;</span>
+      <a href="/legal/privacidad" target="_blank" rel="noopener"
+         class="hover:text-slate-600 transition-colors">Política de Tratamiento de Datos</a>
+    </div>
+  </footer>
 </div>

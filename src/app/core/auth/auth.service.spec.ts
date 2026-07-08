@@ -157,7 +157,7 @@ describe('AuthService', () => {
       const tokens = makeTokens({ sub: 'u5', email: 'new@law.co', fullName: 'New User' });
       authData.register.and.returnValue(of(tokens));
 
-      await service.register('New User', 'new@law.co', 'Password1');
+      await service.register('New User', 'new@law.co', 'Password1', true, true);
 
       expect(service.isAuthenticated()).toBeTrue();
       expect(service.currentUser()?.email).toBe('new@law.co');
@@ -171,7 +171,7 @@ describe('AuthService', () => {
       });
       authData.register.and.returnValue(throwError(() => httpError));
 
-      await expectAsync(service.register('X', 'taken@law.co', 'pass')).toBeRejectedWithError(
+      await expectAsync(service.register('X', 'taken@law.co', 'pass', true, true)).toBeRejectedWithError(
         'Email is already registered',
       );
     });

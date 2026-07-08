@@ -36,9 +36,17 @@ export class AuthService {
     }
   }
 
-  async register(fullName: string, email: string, password: string): Promise<void> {
+  async register(
+    fullName: string,
+    email: string,
+    password: string,
+    acceptedTerms: boolean,
+    acceptedPrivacy: boolean,
+  ): Promise<void> {
     try {
-      const tokens = await firstValueFrom(this.authData.register({ fullName, email, password }));
+      const tokens = await firstValueFrom(
+        this.authData.register({ fullName, email, password, acceptedTerms, acceptedPrivacy }),
+      );
       this._applySession(tokens);
     } catch (err) {
       throw this._toError(err, 'Error al crear la cuenta. Por favor intenta de nuevo.');

@@ -17,6 +17,11 @@ import {
   ArrowLeft,
   Link2Off,
   CheckCircle,
+  FileText,
+  ExternalLink,
+  Shield,
+  Trash2,
+  MessageCircle,
 } from 'lucide-angular';
 import { routes } from './app.routes';
 import { jwtInterceptor } from './core/http/jwt.interceptor';
@@ -46,6 +51,11 @@ export const appConfig: ApplicationConfig = {
         ArrowLeft,
         Link2Off,
         CheckCircle,
+        FileText,
+        ExternalLink,
+        Shield,
+        Trash2,
+        MessageCircle,
       }),
     },
   ],

@@ -1,0 +1,60 @@
+<div class="min-h-screen flex flex-col bg-background">
+
+  <!-- Header -->
+  <header class="bg-primary-700 text-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center gap-3">
+      <lucide-angular name="scale" [size]="24" [strokeWidth]="2" />
+      <span class="text-xl font-bold tracking-wide">LitigApp</span>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="flex-1 w-full max-w-3xl mx-auto px-4 py-8">
+
+    <!-- Back link -->
+    <a routerLink="/"
+       class="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-text-secondary transition-colors mb-6">
+      <lucide-angular name="arrow-left" [size]="15" [strokeWidth]="2" />
+      Volver a LitigApp
+    </a>
+
+    <!-- Loading skeleton -->
+    @if (loading()) {
+      <div class="bg-surface rounded-xl border border-border shadow-sm p-8 space-y-4 animate-pulse">
+        <div class="h-7 bg-slate-100 rounded-lg w-2/3"></div>
+        <div class="space-y-2.5 pt-2">
+          <div class="h-4 bg-slate-100 rounded w-full"></div>
+          <div class="h-4 bg-slate-100 rounded w-11/12"></div>
+          <div class="h-4 bg-slate-100 rounded w-4/5"></div>
+          <div class="h-4 bg-slate-100 rounded w-full"></div>
+          <div class="h-4 bg-slate-100 rounded w-3/4"></div>
+        </div>
+      </div>
+    }
+
+    <!-- Error -->
+    @else if (error()) {
+      <div class="bg-surface rounded-xl border border-danger-border shadow-sm p-8 text-center">
+        <lucide-angular name="circle-alert" [size]="32" class="text-danger-text mx-auto mb-3" />
+        <p class="text-sm text-danger-text">{{ error() }}</p>
+      </div>
+    }
+
+    <!-- Document -->
+    @else {
+      <article
+        class="bg-surface rounded-xl border border-border shadow-sm p-8 legal-content"
+        [innerHTML]="htmlContent()"
+      ></article>
+    }
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-border py-5 mt-6">
+    <p class="text-center text-xs text-text-muted">
+      &copy; {{ currentYear }} LitigApp &middot; Todos los derechos reservados
+    </p>
+  </footer>
+
+</div>

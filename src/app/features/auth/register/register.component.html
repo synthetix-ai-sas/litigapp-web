@@ -140,10 +140,47 @@
           }
         </div>
 
+        <!-- Terms & Conditions acceptance -->
+        <div class="mt-2">
+          <label class="flex items-start gap-2.5 cursor-pointer">
+            <input
+              id="acceptedTerms"
+              type="checkbox"
+              formControlName="acceptedTerms"
+              class="mt-0.5 h-4 w-4 shrink-0 accent-blue-600 cursor-pointer"
+            />
+            <span class="text-sm text-text-secondary leading-snug select-none">
+              He leído y acepto los
+              <a
+                href="/legal/terminos"
+                target="_blank"
+                rel="noopener"
+                class="font-medium text-primary-600 hover:text-primary-700 transition-colors"
+                (click)="$event.stopPropagation()"
+                >Términos y Condiciones</a
+              >
+              y la
+              <a
+                href="/legal/privacidad"
+                target="_blank"
+                rel="noopener"
+                class="font-medium text-primary-600 hover:text-primary-700 transition-colors"
+                (click)="$event.stopPropagation()"
+                >Política de Tratamiento de Datos</a
+              >
+            </span>
+          </label>
+          @if (fieldInvalid('acceptedTerms')) {
+            <p class="mt-1.5 ml-6 text-xs text-danger-text">
+              Debes aceptar los Términos y la Política para continuar
+            </p>
+          }
+        </div>
+
         <!-- Submit -->
         <button
           type="submit"
-          [disabled]="loading()"
+          [disabled]="loading() || termsNotAccepted"
           class="w-full flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700
                  disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium
                  py-2.5 rounded-lg transition-all text-sm shadow-sm hover:shadow-md mt-2"
