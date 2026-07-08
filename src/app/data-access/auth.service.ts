@@ -14,6 +14,8 @@ export interface RegisterRequest {
   password: string;
   fullName: string;
   whatsAppPhone?: string;
+  acceptedTerms: boolean;
+  acceptedPrivacy: boolean;
 }
 
 export interface RefreshRequest {

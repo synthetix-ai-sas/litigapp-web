@@ -27,7 +27,26 @@ export const routes: Routes = [
       import('./features/auth/reset-password/reset-password.component'),
   },
 
-  // Authenticated routes — AppShell provee header + logout para todas
+  // Public legal routes — no auth required
+  {
+    path: 'legal',
+    children: [
+      {
+        path: 'terminos',
+        data: { title: 'Términos y Condiciones', file: 'terminos.v1.0.md' },
+        loadComponent: () =>
+          import('./features/legal/legal-page/legal-page.component'),
+      },
+      {
+        path: 'privacidad',
+        data: { title: 'Política de Tratamiento de Datos Personales', file: 'privacidad.v1.0.md' },
+        loadComponent: () =>
+          import('./features/legal/legal-page/legal-page.component'),
+      },
+    ],
+  },
+
+  // Authenticated routes — AppShell provee header + footer para todas
   {
     path: '',
     canActivate: [authGuard],
