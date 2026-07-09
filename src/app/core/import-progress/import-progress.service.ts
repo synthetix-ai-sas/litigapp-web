@@ -2,10 +2,15 @@ import { Injectable, OnDestroy, inject, signal } from '@angular/core';
 import { ImportsService } from '../../data-access/imports.service';
 import { ImportJob } from '../../shared/domain/import';
 
+/** Consecutive poll failures tolerated before giving up on a down backend. */
+const MAX_CONSECUTIVE_ERRORS = 5;
+
 /**
  * Singleton that owns the import polling lifecycle.
  * Polling starts ONLY after startTracking() is called (i.e. user initiates an import).
- * It auto-stops when status reaches 'completed' or 'failed', or on network error.
+ * It auto-stops when status reaches 'completed' or 'failed', or after several
+ * consecutive network errors (a single transient blip must not kill the loop —
+ * the bulk import job itself competes for DB connections with this poll).
  * Dashboard and banner read signals; they never call the backend directly for import state.
  */
 @Injectable({ providedIn: 'root' })
@@ -19,12 +24,14 @@ export class ImportProgressService implements OnDestroy {
   readonly completedJob = signal<ImportJob | null>(null);
 
   private pollingTimer?: ReturnType<typeof setInterval>;
+  private consecutiveErrors = 0;
 
   /** Call this immediately after POST /imports succeeds. */
   startTracking(): void {
     this.stopPolling();
     this.activeImport.set(null);
     this.completedJob.set(null);
+    this.consecutiveErrors = 0;
     this.pollingTimer = setInterval(() => this.tick(), 3000);
     // Run one tick immediately so the banner appears without a 3s delay.
     this.tick();
@@ -43,6 +50,8 @@ export class ImportProgressService implements OnDestroy {
   private tick(): void {
     this.importsService.getActive().subscribe({
       next: (res) => {
+        this.consecutiveErrors = 0;
+
         if (!res.hasActive || res.importJob === null) {
           // No active import — backend already past the 60s completed window.
           this.stopPolling();
@@ -62,9 +71,13 @@ export class ImportProgressService implements OnDestroy {
         }
       },
       error: () => {
-        // Stop polling on network error to avoid hammering a down backend.
-        this.stopPolling();
-        this.activeImport.set(null);
+        // Tolerate transient failures (e.g. the bulk import job itself straining
+        // the DB pool) — only give up after several polls in a row fail.
+        this.consecutiveErrors++;
+        if (this.consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+          this.stopPolling();
+          this.activeImport.set(null);
+        }
       },
     });
   }
