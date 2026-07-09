@@ -14,7 +14,6 @@ import {
   Upload,
   User,
 } from 'lucide-angular';
-import { ImportActiveResponse } from '../../../shared/domain/import';
 import { ProcessListItem } from '../../../shared/domain/process';
 import { formatDate } from '../../../shared/util/format-date';
 
@@ -33,7 +32,6 @@ export default class ProcessesTabComponent {
   casesPage = input<number>(1);
   casesTotalPages = input<number>(1);
   filterForm = input.required<FormGroup>();
-  importActive = input<ImportActiveResponse | null>(null);
 
   openOptions = output<ProcessListItem>();
   openAdd = output<void>();

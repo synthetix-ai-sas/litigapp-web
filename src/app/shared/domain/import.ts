@@ -1,10 +1,19 @@
 export type ImportStatus = 'pending' | 'running' | 'paused' | 'completed' | 'failed';
 
+/** One entry of the per-row error array backend stores as jsonb: [{row, radicado, code, message}, ...]. */
 export interface ImportError {
   row: number;
+  radicado?: string;
+  code?: string;
   message: string;
 }
 
+/**
+ * Matches backend ImportJobResponse (GET /imports/active, GET /imports/{id}).
+ * `errors` here is the ALREADY-PARSED array — the wire format sends it as a raw
+ * JSON string (`errors: string | null`); ImportsService parses it before this
+ * type reaches the rest of the app. See ImportsService for the wire type.
+ */
 export interface ImportJob {
   id: string;
   fileName: string;
@@ -16,11 +25,6 @@ export interface ImportJob {
   errors: ImportError[];
   createdAt: string;
   completedAt: string | null;
-}
-
-export interface ImportActiveResponse {
-  hasActive: boolean;
-  importJob: ImportJob | null;
 }
 
 export interface ExecuteImportResponse {
@@ -36,7 +40,7 @@ export interface ImportColumn {
 export interface ImportPreview {
   previewId: string;
   columns: ImportColumn[];
-  rows: Record<string, string>[];
+  rows: Record<string, string | null>[];
   totalRows: number;
 }
 

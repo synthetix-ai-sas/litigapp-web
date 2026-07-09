@@ -1,15 +1,49 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 import { AppConfig } from '../core/config/app-config';
-import {
-  ExecuteImportResponse,
-  ImportActiveResponse,
-  ImportJob,
-  ImportMapping,
-  ImportPreview,
-} from '../shared/domain/import';
+import { ExecuteImportResponse, ImportError, ImportJob, ImportMapping, ImportPreview } from '../shared/domain/import';
+
+/**
+ * Wire shape of backend `ImportJobResponse` (GET /imports/active, GET /imports/{id}).
+ * `errors` is a raw jsonb string on the wire — NOT an array — and must be parsed.
+ */
+interface ImportJobWire {
+  id: string;
+  fileName: string;
+  totalRows: number;
+  processedRows: number;
+  successCount: number;
+  errorCount: number;
+  status: string;
+  createdAt: string;
+  completedAt: string | null;
+  errors: string | null;
+}
+
+function toImportJob(wire: ImportJobWire): ImportJob {
+  let errors: ImportError[] = [];
+  if (wire.errors) {
+    try {
+      errors = JSON.parse(wire.errors) as ImportError[];
+    } catch {
+      errors = [];
+    }
+  }
+  return {
+    id: wire.id,
+    fileName: wire.fileName,
+    totalRows: wire.totalRows,
+    processedRows: wire.processedRows,
+    successCount: wire.successCount,
+    errorCount: wire.errorCount,
+    status: wire.status as ImportJob['status'],
+    createdAt: wire.createdAt,
+    completedAt: wire.completedAt,
+    errors,
+  };
+}
 
 @Injectable({ providedIn: 'root' })
 export class ImportsService {
@@ -35,10 +69,17 @@ export class ImportsService {
   }
 
   getById(id: string): Observable<ImportJob> {
-    return this.http.get<ImportJob>(`${this.base}/${id}`);
+    return this.http.get<ImportJobWire>(`${this.base}/${id}`).pipe(map(toImportJob));
   }
 
-  getActive(): Observable<ImportActiveResponse> {
-    return this.http.get<ImportActiveResponse>(`${this.base}/active`);
+  /**
+   * GET /imports/active — NOT `{ hasActive, importJob }`. The backend returns
+   * 204 No Content (empty body → null) when there's no active/recent job, or
+   * 200 with the ImportJobResponse body directly otherwise.
+   */
+  getActive(): Observable<ImportJob | null> {
+    return this.http
+      .get<ImportJobWire | null>(`${this.base}/active`)
+      .pipe(map((wire) => (wire ? toImportJob(wire) : null)));
   }
 }

@@ -30,8 +30,11 @@ export class ImportCompleteDialogComponent {
   protected downloadErrors(): void {
     const job = this.importProgress.completedJob();
     if (!job || job.errors.length === 0) return;
-    const header = 'Fila,Error';
-    const rows = job.errors.map((e) => `${e.row},"${e.message.replace(/"/g, '""')}"`);
+    const header = 'Fila,Radicado,Codigo,Error';
+    const rows = job.errors.map(
+      (e) =>
+        `${e.row},"${(e.radicado ?? '').replace(/"/g, '""')}","${(e.code ?? '').replace(/"/g, '""')}","${e.message.replace(/"/g, '""')}"`,
+    );
     const csv = '﻿' + [header, ...rows].join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);

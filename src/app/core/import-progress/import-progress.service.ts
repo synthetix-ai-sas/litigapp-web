@@ -49,17 +49,17 @@ export class ImportProgressService implements OnDestroy {
 
   private tick(): void {
     this.importsService.getActive().subscribe({
-      next: (res) => {
+      next: (job) => {
         this.consecutiveErrors = 0;
 
-        if (!res.hasActive || res.importJob === null) {
-          // No active import — backend already past the 60s completed window.
+        if (job === null) {
+          // No active import — backend already past the 60s completed window
+          // (204 No Content, mapped to null by ImportsService).
           this.stopPolling();
           this.activeImport.set(null);
           return;
         }
 
-        const job = res.importJob;
         if (job.status === 'completed' || job.status === 'failed') {
           this.stopPolling();
           this.activeImport.set(null);

@@ -1059,28 +1059,25 @@ Internamente compone el radicado: `courts.official_code (12) + filingYear (4) + 
 
 #### GET `/api/v1/imports/active`
 
-Permite al frontend saber si el usuario tiene una importación en curso para bloquear la UI:
+Permite al frontend saber si el usuario tiene una importación en curso para bloquear la UI. **No** hay envelope `{ hasActive, importJob }` — el backend responde directamente con el job o con `204 No Content`:
 
 ```json
 {
-  "hasActive": true,
-  "importJob": {
-    "id": "uuid",
-    "fileName": "portafolio.xlsx",
-    "totalRows": 87,
-    "processedRows": 34,
-    "successCount": 0,
-    "errorCount": 0,
-    "status": "running",
-    "errors": [],
-    "createdAt": "...",
-    "completedAt": null
-  }
+  "id": "uuid",
+  "fileName": "portafolio.xlsx",
+  "totalRows": 87,
+  "processedRows": 34,
+  "successCount": 0,
+  "errorCount": 0,
+  "status": "running",
+  "createdAt": "...",
+  "completedAt": null,
+  "errors": null
 }
 ```
-> Contrato canónico de `/imports/active`: **`{ hasActive: boolean, importJob: {...} | null }`** (sin envelope). Cuando no hay import en curso: `{ "hasActive": false, "importJob": null }`.
+> **Contrato canónico real** (`ImportJobResponse` en `ImportContracts.cs`): **200 OK con el job directamente**, o **204 No Content** (body vacío) cuando no hay job activo ni reciente. El frontend (`ImportsService.getActive()`) mapea 204 → `null`. `errors` viaja como **string JSON crudo** (`[{row, radicado, code, message}, ...]` serializado), no como array — hay que hacer `JSON.parse` antes de usarlo.
 
-Si `hasActive = true`, el frontend deshabilita el botón "Agregar Proceso" con tooltip: "Hay una importación en curso. Espera a que termine antes de agregar procesos manualmente."
+Si el body no es `null`, el frontend deshabilita el botón "Agregar Proceso" con tooltip: "Hay una importación en curso. Espera a que termine antes de agregar procesos manualmente."
 
 #### GET `/api/v1/processes/novelties`
 
@@ -2404,10 +2401,10 @@ Crear `Directory.Build.props` con:
    - Crea `ImportJob` con `status='pending'`.
    - Encola `BulkImportJob(importJobId)` en cola `bulk_import`.
    - Devuelve 202 Accepted con `{ importJobId, status: 'pending' }`.
-5. **`GET /imports/active`** — endpoint **único** que el frontend usa para todo el ciclo del import. Contrato canónico (ver §5): **`{ hasActive: boolean, importJob: {...} | null }`**, sin envelope.
-   - Si hay job en curso (`pending`/`running`): `hasActive=true` e `importJob` con campos `{ id, fileName, totalRows, processedRows, successCount, errorCount, status, errors, createdAt, completedAt }`.
-   - Si el último job terminó hace **menos de 60 segundos**: también `hasActive=true` con `importJob.status='completed'` (ventana corta para que el frontend detecte la finalización vía polling y dispare popup + refresh).
-   - Pasados esos 60s, o si nunca hubo import: **`{ hasActive: false, importJob: null }`**.
+5. **`GET /imports/active`** — endpoint **único** que el frontend usa para todo el ciclo del import. Contrato canónico real (ver §5, `ImportJobResponse` en `ImportContracts.cs`): **200 OK con el job directamente, o 204 No Content** (sin body) — NO hay envelope `{ hasActive, importJob }`.
+   - Si hay job en curso (`pending`/`running`): 200 con `{ id, fileName, totalRows, processedRows, successCount, errorCount, status, createdAt, completedAt, errors }`, donde `errors` es un **string JSON crudo** (hay que parsearlo), no un array.
+   - Si el último job terminó hace **menos de 60 segundos**: también 200 con `status='completed'` (ventana corta para que el frontend detecte la finalización vía polling y dispare popup + refresh).
+   - Pasados esos 60s, o si nunca hubo import: **204 No Content** (body vacío → el frontend lo mapea a `null`).
 6. `GET /imports/{id}` — opcional, solo para consulta directa de un job específico (link desde email, historial). No se usa en el flujo principal.
 7. `BulkImportJob`:
    - `UPDATE import_jobs SET status='running'` al inicio.
@@ -2462,13 +2459,14 @@ Crear `Directory.Build.props` con:
    (notificación extra-app, sirve si cerró el navegador).
 ```
 
-**Implementación del banner** (Angular): servicio singleton `ImportProgressService` con un signal `activeImport = signal<ImportJobStatus | null>(null)`.
+**Implementación del banner** (Angular): servicio singleton `ImportProgressService` con dos signals — `activeImport = signal<ImportJob | null>(null)` (banner + bloqueo de botón) y `completedJob = signal<ImportJob | null>(null)` (dispara el popup de resumen). `ImportsService.getActive()` traduce la respuesta cruda del backend (200 con el job directo, o 204 → `null`) a `ImportJob | null`, parseando `errors` (string JSON) a array.
 
 **Polling — reglas estrictas (NO ocioso):**
-- El polling a `GET /imports/active` **solo arranca cuando el usuario inicia un import** (tras `POST /imports` exitoso, usando el `importJobId` devuelto).
-- Se **auto-detiene** apenas la respuesta trae `status='completed'` o `'failed'` (o ante error de red) — hacer `clearInterval`/completar el stream ahí mismo. Jamás un `setInterval` perpetuo atado solo a `ngOnDestroy`.
+- El polling a `GET /imports/active` **solo arranca cuando el usuario inicia un import** (tras `POST /imports` exitoso).
+- Se **auto-detiene** apenas la respuesta trae `status='completed'` o `'failed'`, o el body es `null` (204) — hacer `clearInterval`/completar el stream ahí mismo. Jamás un `setInterval` perpetuo atado solo a `ngOnDestroy`.
+- Ante error de red, el polling **tolera fallos transitorios** (el propio `BulkImportJob` compite por conexiones de la pool de Postgres mientras corre) y solo desiste tras varios fallos consecutivos seguidos (`MAX_CONSECUTIVE_ERRORS`), no ante uno solo — un único blip no debe matar el banner para siempre.
 - En estado idle (sin import en curso) el dashboard **NO llama** `/imports/active`. **Cero polling de fondo.** El caso "el usuario cerró la app durante el import" lo cubre el **email** de finalización, no un polling permanente.
-- La lógica de polling vive en el `ImportProgressService`, **no** en `dashboard.component` (que solo lee el signal). El componente `<global-import-banner>` se renderiza condicionalmente en `dashboard.component.html` (bajo el header) leyendo ese signal.
+- La lógica de polling vive en el `ImportProgressService`, **no** en `dashboard.component` (que solo lee los signals). El componente `<app-import-banner>` se renderiza condicionalmente en `dashboard.component.html` (bajo el header) leyendo `activeImport()`.
 
 **Bloqueo en el backend (defensa en profundidad)**: aunque el frontend deshabilita el botón, los endpoints `POST /processes/full-number` y `/wizard` también validan que no haya import activo del usuario → devuelven 409 con `error.code='IMPORT_IN_PROGRESS'` si alguien intenta llamar la API directamente (curl, Postman, segunda pestaña abierta). Esto evita race conditions y mal uso.
 
