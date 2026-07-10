@@ -120,10 +120,10 @@ export class ProcessImport {
         file?.name,
       )
       .subscribe({
-        next: () => {
+        next: (res) => {
           this.submitting.set(false);
           // Delegate all polling and state to the singleton service.
-          this.importProgress.startTracking();
+          this.importProgress.startTracking(res.importJobId);
           this.completed.emit();
         },
         error: () => {

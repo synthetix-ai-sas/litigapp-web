@@ -25,14 +25,37 @@ export class ImportProgressService implements OnDestroy {
 
   private pollingTimer?: ReturnType<typeof setInterval>;
   private consecutiveErrors = 0;
+  private readonly onVisible = (): void => {
+    // Browsers throttle setInterval heavily on backgrounded tabs (Chrome: as
+    // little as once/minute). Firing a tick the moment the tab regains focus
+    // means the user sees the outcome immediately instead of waiting out a
+    // throttled interval — on top of the /imports/{id} fallback in tick(),
+    // which guarantees correctness even if this listener never fires.
+    if (document.visibilityState === 'visible' && this.pollingTimer) {
+      this.tick();
+    }
+  };
 
-  /** Call this immediately after POST /imports succeeds. */
-  startTracking(): void {
+  /**
+   * Id of the job we're tracking, kept until we've confirmed a terminal state.
+   * GET /imports/active only reports a completed job for 60s after CompletedAt —
+   * if a poll is delayed past that window (e.g. the browser throttles setInterval
+   * on a backgrounded tab, which is the common real-world trigger), the job can
+   * vanish from /active without the frontend ever having observed 'completed'.
+   * When that happens we fall back to GET /imports/{id}, which has no time window,
+   * to get the definitive final state instead of silently giving up.
+   */
+  private trackedJobId: string | null = null;
+
+  /** Call this immediately after POST /imports succeeds, with the returned importJobId. */
+  startTracking(jobId: string): void {
     this.stopPolling();
     this.activeImport.set(null);
     this.completedJob.set(null);
     this.consecutiveErrors = 0;
+    this.trackedJobId = jobId;
     this.pollingTimer = setInterval(() => this.tick(), 3000);
+    document.addEventListener('visibilitychange', this.onVisible);
     // Run one tick immediately so the banner appears without a 3s delay.
     this.tick();
   }
@@ -53,16 +76,18 @@ export class ImportProgressService implements OnDestroy {
         this.consecutiveErrors = 0;
 
         if (job === null) {
-          // No active import — backend already past the 60s completed window
-          // (204 No Content, mapped to null by ImportsService).
-          this.stopPolling();
-          this.activeImport.set(null);
+          // Backend says nothing is active/recent. Before giving up, confirm
+          // against the specific job we started — the 60s "recent" window on
+          // /active may have lapsed between polls without us ever seeing the
+          // completed status (see trackedJobId doc comment).
+          this.resolveViaFallback();
           return;
         }
 
         if (job.status === 'completed' || job.status === 'failed') {
           this.stopPolling();
           this.activeImport.set(null);
+          this.trackedJobId = null;
           if (job.status === 'completed') {
             this.completedJob.set(job);
           }
@@ -77,7 +102,35 @@ export class ImportProgressService implements OnDestroy {
         if (this.consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
           this.stopPolling();
           this.activeImport.set(null);
+          this.trackedJobId = null;
         }
+      },
+    });
+  }
+
+  /** GET /imports/{id} has no time window — always returns the job's true current state. */
+  private resolveViaFallback(): void {
+    const jobId = this.trackedJobId;
+    if (!jobId) {
+      this.stopPolling();
+      this.activeImport.set(null);
+      return;
+    }
+
+    this.importsService.getById(jobId).subscribe({
+      next: (job) => {
+        this.stopPolling();
+        this.activeImport.set(null);
+        this.trackedJobId = null;
+        if (job.status === 'completed') {
+          this.completedJob.set(job);
+        }
+      },
+      error: () => {
+        // Job truly gone or unreachable — nothing more we can do.
+        this.stopPolling();
+        this.activeImport.set(null);
+        this.trackedJobId = null;
       },
     });
   }
@@ -85,5 +138,6 @@ export class ImportProgressService implements OnDestroy {
   private stopPolling(): void {
     clearInterval(this.pollingTimer);
     this.pollingTimer = undefined;
+    document.removeEventListener('visibilitychange', this.onVisible);
   }
 }
