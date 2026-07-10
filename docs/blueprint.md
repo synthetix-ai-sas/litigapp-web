@@ -1009,14 +1009,11 @@ Authorization: Bearer <jwt>
 1. Valida `fileNumber` (23 dígitos).
 2. Verifica que NO haya `import_jobs` activo del usuario → si lo hay, **409 Conflict** con `error.code = 'IMPORT_IN_PROGRESS'`.
 3. Verifica unicidad por `(user_id, file_number)` → si existe, **409 Conflict** con `error.code = 'DUPLICATE_PROCESS'`.
-4. **Llama síncronamente a los 4 endpoints de la API Rama Judicial** (con Polly):
-   - `GetOverviewByFileNumberAsync` → si retorna null → **422 Unprocessable** ("Proceso no encontrado en Rama Judicial").
-   - `GetDetailAsync(externalProcessId)`.
-   - `GetSubjectsAsync(externalProcessId)`.
-   - `GetFirstPageActionsAsync(externalProcessId)`.
-5. **Persiste todo en una sola transacción**: `processes` + `process_subjects` + `process_actions`.
-6. Setea `attended = true` (es creación, no novedad pendiente).
-7. Devuelve **201 Created** con el proceso completo (incluye sujetos y actuaciones).
+4. **Llama al overview** (con Polly): `GetOverviewByFileNumberAsync` → si retorna null / 200 vacío → **422 Unprocessable** ("Proceso no encontrado en Rama Judicial").
+   - **⚠️ Si `esPrivado == true`** (proceso privado): NO llamar a los otros 3 endpoints (responden 404). Persistir SOLO overview, `is_private = true`, `last_court_action_at = null`, **sin filas en `process_subjects` ni `process_actions`**, `sync_status = 'ok'`, `sync_phase = 'idle'`, `attended = true` → **201 Created**. Ver callout "Manejo de procesos privados" abajo.
+5. **Si NO es privado, llama a los otros 3 endpoints** (con Polly): `GetDetailAsync`, `GetSubjectsAsync`, `GetFirstPageActionsAsync`.
+6. **Persiste en una sola transacción**: `processes` + `process_subjects` + `process_actions`. Defensa: **nunca** insertar un `process_subjects` con `subject_type` nulo/vacío — si el parseo de `sujetosProcesales` produce una entrada malformada, se descarta esa entrada (el `NOT NULL` se mantiene, es correcto).
+7. Setea `attended = true`. Devuelve **201 Created** con el proceso.
 
 **Fallback de robustez** — si algún call DESPUÉS del overview falla tras agotar reintentos de Polly:
 
@@ -1024,6 +1021,16 @@ Authorization: Bearer <jwt>
 - Marcamos `sync_status = 'partial'` con `sync_error` describiendo qué faltó.
 - Encolamos `CompletePartialFetchJob(processId)` para reintentar en background.
 - Devolvemos **201 Created** con `syncStatus = 'partial'` para que el frontend muestre: "Proceso creado. Algunos datos se están terminando de cargar, recarga en unos minutos."
+
+**Manejo de procesos privados (`esPrivado: true`)** — caso confirmado en pruebas (ej. radicado `17873408900220240033000`):
+
+Algunos procesos son **privados**. El overview los devuelve con `esPrivado: true`, `sujetosProcesales: "--- [ PROCESO PRIVADO ] ---"` y `fechaUltimaActuacion: null`. Los otros 3 endpoints (detalle, sujetos, actuaciones) responden **404 `"No se puede ver el detalle de un proceso privado"`**. Este es un caso NORMAL, no un error.
+
+- **DTO**: el overview debe exponer `esPrivado` (bool). El `IRamaJudicialClient` **nunca** debe tratar el 404 de un proceso privado como error reintentable — es un resultado terminal conocido (si no, Hangfire reintenta 10 veces inútilmente).
+- **Backend** (creación individual y `BulkImportJob` comparten `ProcessCreationService`, así que se arregla en un solo lugar): si `esPrivado`, persistir solo overview, `is_private=true`, **sin subjects/actions**, `sync_status='ok'`, `sync_phase='idle'`. NUNCA parsear `sujetosProcesales` a `process_subjects` — el placeholder no es un sujeto y produce el `null value in column "subject_type"` que rompía el import.
+- **Sync engine**: `OverviewSweepJob` puede refrescar el overview de privados, pero **nunca** encola `ActionsSweepJob` para ellos (darían 404). Con `fechaUltimaActuacion` null y sin actuaciones, quedan `idle` permanentemente. (Si algún día `esPrivado` pasara a false, se trata como cambio normal.)
+- **UI**: mostrar un **tag "Privado"** en listados y en el detalle. En el detalle, en vez de sujetos/actuaciones, un mensaje: *"Proceso privado — la Rama Judicial no permite consultar sujetos ni actuaciones."* `canDownloadPdf = false` (igual que en 'partial'). El DTO de proceso incluye `isPrivate: true`.
+  - ⚠️ **Gap confirmado (2026-07-10)**: `isPrivate` solo existe hoy en `ProcessDetailDto` (`GetByIdAsync`). `ProcessListItemDto` (usado por `ListProcesses`/`ListNovelties`) **NO** lo expone todavía — verificado contra el código real de `litigapp-backend` (`ProcessReader.cs`, `PaginateAsync`). El frontend ya trae el tipo `isPrivate?: boolean` opcional en `ProcessListItem` y renderiza el badge condicionalmente, así que en cuanto el backend agregue el campo al DTO de lista, el badge aparece sin cambios de frontend. Hasta entonces, el tag "Privado" solo se ve en los diálogos de detalle (`attend-modal`, `options-modal`), no en las filas de Novedades/Procesos.
 
 **Respuesta exitosa (201)** — sin envelope, el DTO directo:
 ```json

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { Download, LucideAngularModule, Scale, TriangleAlert, X } from 'lucide-angular';
+import { Download, Lock, LucideAngularModule, Scale, TriangleAlert, X } from 'lucide-angular';
 import { ProcessDetail } from '../../../shared/domain/process';
 import { formatDate } from '../../../shared/util/format-date';
 
@@ -18,6 +18,7 @@ export class OptionsModalComponent {
   downloadPdf = output<void>();
 
   protected readonly Download = Download;
+  protected readonly Lock = Lock;
   protected readonly Scale = Scale;
   protected readonly TriangleAlert = TriangleAlert;
   protected readonly X = X;

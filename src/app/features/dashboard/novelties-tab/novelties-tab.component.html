@@ -20,7 +20,14 @@
             <div class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
               <div>
                 <div class="text-xs text-slate-400 font-medium mb-1">ID Proceso</div>
-                <div class="font-semibold text-blue-700 break-all">{{ proc.fileNumber }}</div>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="font-semibold text-blue-700 break-all">{{ proc.fileNumber }}</span>
+                  @if (proc.isPrivate) {
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-200 text-slate-700">
+                      Privado
+                    </span>
+                  }
+                </div>
               </div>
               <div>
                 <div class="text-xs text-slate-400 font-medium mb-1">Última Actualización</div>
