@@ -1,4 +1,4 @@
-<app-import-banner [importJob]="importActive()?.importJob ?? null" />
+<app-import-banner />
 
 <main class="max-w-7xl mx-auto py-6"
   style="padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right)); padding-bottom: max(1.5rem, env(safe-area-inset-bottom))">
@@ -31,8 +31,8 @@
         </button>
       </div>
       <button (click)="openAdd()"
-        [disabled]="importActive()?.hasActive"
-        [title]="importActive()?.hasActive ? 'Hay una importación en curso. Espera a que termine.' : 'Agregar Proceso'"
+        [disabled]="importProgress.activeImport() !== null"
+        [title]="importProgress.activeImport() !== null ? 'Espera a que termine la importación' : 'Agregar Proceso'"
         class="mb-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-3 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors shadow-sm shrink-0">
         <lucide-icon [img]="Plus" [size]="18" />
         <span class="hidden sm:inline">Agregar Proceso</span>
@@ -54,7 +54,6 @@
         [casesPage]="casesPage()"
         [casesTotalPages]="casesTotalPages()"
         [filterForm]="filterForm"
-        [importActive]="importActive()"
         (openOptions)="openOptions($event)"
         (openAdd)="openAdd()"
         (goToPage)="goToPage($event)"
@@ -62,7 +61,12 @@
     }
 </main>
 
-<!-- MODALS -->
+<!-- Import completion popup — rendered outside <main> so it overlays everything -->
+<app-import-complete-dialog
+  (viewProcesses)="onImportCompleteViewProcesses()"
+  (dismissed)="onImportCompleteDismissed()" />
+
+<!-- Feature modals -->
 @if (modalType() !== null) {
   <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
     @if (modalType() === 'attend') {
@@ -88,7 +92,7 @@
         (close)="closeModal()"
         (submitted)="submitAdd()"
         (wizardCreated)="onWizardCreated()"
-        (importCompleted)="onImportCompleted()" />
+        (importCompleted)="onImportStarted()" />
     }
   </div>
 }

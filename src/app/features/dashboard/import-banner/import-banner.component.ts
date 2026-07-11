@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { LucideAngularModule, Upload } from 'lucide-angular';
-import { ImportJob } from '../../../shared/domain/import';
+import { ImportProgressService } from '../../../core/import-progress/import-progress.service';
 
 @Component({
   selector: 'app-import-banner',
@@ -10,6 +10,6 @@ import { ImportJob } from '../../../shared/domain/import';
   styleUrl: './import-banner.component.css',
 })
 export class ImportBannerComponent {
-  importJob = input<ImportJob | null>(null);
+  protected readonly importProgress = inject(ImportProgressService);
   protected readonly Upload = Upload;
 }

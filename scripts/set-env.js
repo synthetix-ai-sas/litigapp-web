@@ -4,7 +4,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const apiUrl = process.env.API_URL || 'http://localhost:62247';
+const apiUrl = process.env.API_URL || 'http://localhost:5119';
 const production = process.env.NODE_ENV === 'production' || process.argv.includes('--prod');
 
 const content = `// Archivo autogenerado por scripts/set-env.js — no editar a mano.

@@ -1,0 +1,94 @@
+@let job = importProgress.completedJob();
+@if (job) {
+  <!-- Backdrop -->
+  <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+
+    <!-- Modal -->
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+
+      <!-- Header -->
+      <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+          <lucide-icon [img]="CheckCircle" [size]="20" class="text-green-500" />
+          Importación completada
+        </h3>
+        <button (click)="close()" class="text-slate-400 hover:text-slate-600 bg-white rounded-full p-1 shadow-sm transition-colors">
+          <lucide-icon [img]="X" [size]="20" />
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="p-6">
+
+        <!-- Summary -->
+        <div class="bg-slate-50 rounded-xl border border-slate-200 divide-y divide-slate-200 mb-5">
+          <div class="flex items-center justify-between px-4 py-3">
+            <span class="text-sm text-slate-600">Archivo</span>
+            <span class="text-sm font-medium text-slate-800 max-w-[200px] truncate text-right" [title]="job.fileName">{{ job.fileName }}</span>
+          </div>
+          <div class="flex items-center justify-between px-4 py-3">
+            <span class="text-sm text-slate-600">Total procesados</span>
+            <span class="text-sm font-semibold text-slate-800">{{ job.processedRows }}</span>
+          </div>
+          <div class="flex items-center justify-between px-4 py-3">
+            <span class="text-sm text-slate-600 flex items-center gap-1.5">
+              <lucide-icon [img]="CheckCircle" [size]="14" class="text-green-500" />
+              Cargados correctamente
+            </span>
+            <span class="text-sm font-semibold text-green-700">{{ job.successCount }}</span>
+          </div>
+          @if (job.errorCount > 0) {
+            <div class="flex items-center justify-between px-4 py-3">
+              <span class="text-sm text-slate-600 flex items-center gap-1.5">
+                <lucide-icon [img]="AlertTriangle" [size]="14" class="text-amber-500" />
+                Con errores
+              </span>
+              <span class="text-sm font-semibold text-amber-700">{{ job.errorCount }}</span>
+            </div>
+          }
+        </div>
+
+        <!-- Error details (first 5) -->
+        @if (job.errors && job.errors.length > 0) {
+          <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-5">
+            <p class="text-xs font-semibold text-amber-800 mb-2">Errores detectados (primeros {{ job.errors.length > 5 ? 5 : job.errors.length }}):</p>
+            <ul class="text-xs text-amber-700 space-y-1">
+              @for (err of job.errors.slice(0, 5); track err.row) {
+                <li>· Fila {{ err.row }}: {{ err.message }}</li>
+              }
+            </ul>
+            @if (job.errors.length > 5) {
+              <p class="text-xs text-amber-600 mt-1">...y {{ job.errors.length - 5 }} más. Descarga el CSV para ver todos.</p>
+            }
+          </div>
+        }
+
+        <!-- Actions -->
+        <div class="flex flex-col gap-2">
+          @if (job.errorCount > 0) {
+            <button
+              (click)="downloadErrors()"
+              class="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100 font-medium rounded-lg transition-colors text-sm"
+            >
+              <lucide-icon [img]="Download" [size]="16" />
+              Descargar CSV de errores
+            </button>
+          }
+          <button
+            (click)="goToProcesses()"
+            class="w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors text-sm"
+          >
+            Ver mis procesos
+          </button>
+          <button
+            (click)="close()"
+            class="w-full px-4 py-2.5 text-slate-600 hover:bg-slate-100 font-medium rounded-lg transition-colors text-sm"
+          >
+            Cerrar
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+}

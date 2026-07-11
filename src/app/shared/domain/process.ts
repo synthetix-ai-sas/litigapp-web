@@ -16,6 +16,12 @@ export interface ProcessListItem {
   lastCourtActionAt: string | null;
   courtName: string | null;
   attended: boolean;
+  /**
+   * Not yet sent by ProcessListItemDto (only ProcessDetailDto has it today) — optional
+   * so the list badge activates automatically once the backend adds it, without a
+   * frontend redeploy. See blueprint "Manejo de procesos privados".
+   */
+  isPrivate?: boolean;
 }
 
 export interface CourtSummary {
@@ -59,6 +65,7 @@ export interface ProcessDetail {
   attended: boolean;
   syncStatus: SyncStatus;
   syncPhase: string;
+  isPrivate: boolean;
   canDownloadPdf: boolean;
   subjects: ProcessSubject[];
   actions: ProcessAction[];
