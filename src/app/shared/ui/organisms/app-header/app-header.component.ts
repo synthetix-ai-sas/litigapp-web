@@ -11,6 +11,7 @@ import { Bell, LogOut, LucideAngularModule, Scale } from 'lucide-angular';
 export class AppHeaderComponent {
   noveltiesCount = input<number>(0);
   logout = output<void>();
+  bellClick = output<void>();
 
   protected readonly Scale = Scale;
   protected readonly Bell = Bell;
