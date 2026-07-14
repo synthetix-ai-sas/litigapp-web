@@ -24,6 +24,11 @@ export class AuthService {
   private readonly _currentUser = signal<User | null>(this.storage.getUser());
   readonly currentUser = this._currentUser.asReadonly();
   readonly isAuthenticated = computed(() => !!this._currentUser());
+  readonly userInitials = computed(() => {
+    const name = this._currentUser()?.fullName ?? '';
+    return name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('') || '?';
+  });
+  readonly userName = computed(() => this._currentUser()?.fullName ?? '');
 
   private _refreshPromise: Promise<boolean> | null = null;
 

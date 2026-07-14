@@ -1,55 +1,59 @@
 <section>
-  <div class="mb-6">
-    <h2 class="text-2xl font-bold text-slate-800">Procesos con nuevos estados</h2>
-    <p class="text-slate-500 text-sm mt-1">Revisa y marca como atendidos los cambios recientes.</p>
+  <!-- Info banner -->
+  <div class="mb-6 bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-start gap-4">
+    <div class="mt-1">
+      <lucide-icon [img]="Info" [size]="24" class="text-blue-600" />
+    </div>
+    <div>
+      <h2 class="text-lg font-bold text-blue-900">Novedades de la Rama Judicial</h2>
+      <p class="text-blue-800 text-sm mt-1">El sistema ha detectado cambios de estado en tus procesos desde la última sincronización. Por favor revisa cada uno y márcalo como atendido.</p>
+    </div>
   </div>
 
   <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
     @if (loading()) {
       <div class="p-8 text-center text-slate-400">Cargando…</div>
     } @else if (novelties().length === 0) {
-      <div class="p-8 text-center text-slate-500">
-        <lucide-icon [img]="CheckCircle" [size]="48" class="mx-auto text-green-400 mb-3" />
-        <p class="text-lg font-medium">¡Al día!</p>
-        <p>No tienes novedades pendientes por atender.</p>
+      <div class="p-12 text-center text-slate-500 flex flex-col items-center justify-center bg-slate-50/50">
+        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-4">
+          <lucide-icon [img]="CheckCircle" [size]="40" class="text-green-500" />
+        </div>
+        <h3 class="text-xl font-bold text-slate-700 mb-1">¡Estás al día!</h3>
+        <p class="max-w-md">No tienes novedades pendientes. El servicio actualizador automático corre todos los días e informará por email si detecta cambios.</p>
       </div>
     } @else {
       <div class="divide-y divide-slate-100">
         @for (proc of novelties(); track proc.id) {
-          <div class="p-4 hover:bg-slate-50 transition-colors flex items-center justify-between">
-            <div class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-              <div>
-                <div class="text-xs text-slate-400 font-medium mb-1">ID Proceso</div>
-                <div class="flex items-center gap-2 flex-wrap">
-                  <span class="font-semibold text-blue-700 break-all">{{ proc.fileNumber }}</span>
-                  @if (proc.isPrivate) {
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-200 text-slate-700">
-                      Privado
-                    </span>
-                  }
-                </div>
+          <div class="p-5 hover:bg-slate-50 transition-colors flex items-center justify-between group">
+            <div class="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+              <div class="md:col-span-1">
+                <div class="text-[11px] text-slate-500 uppercase tracking-wide font-semibold mb-1">Radicado</div>
+                <div class="font-mono text-sm text-blue-800 bg-blue-50 px-2 py-1 rounded inline-block border border-blue-100 break-all">{{ proc.fileNumber }}</div>
               </div>
-              <div>
-                <div class="text-xs text-slate-400 font-medium mb-1">Última Actualización</div>
-                <div class="flex items-center gap-1.5 text-slate-700">
+              <div class="md:col-span-1">
+                <div class="text-[11px] text-slate-500 uppercase tracking-wide font-semibold mb-1">Actualización</div>
+                <div class="flex items-center gap-1.5 text-slate-700 text-sm font-medium">
                   <lucide-icon [img]="Clock" [size]="14" class="text-slate-400" />
                   {{ formatDate(proc.lastCourtActionAt) }}
                 </div>
               </div>
-              <div>
-                <div class="text-xs text-slate-400 font-medium mb-1">Nuevo Estado</div>
-                <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+              <div class="md:col-span-2">
+                <div class="text-[11px] text-slate-500 uppercase tracking-wide font-semibold mb-1">Nuevo Estado / Actuación</div>
+                <div class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200 shadow-sm">
+                  <lucide-icon [img]="Bell" [size]="12" class="mr-1.5" />
                   {{ proc.currentStatus ?? '—' }}
                 </div>
               </div>
             </div>
-            <button
-              (click)="attend.emit(proc)"
-              title="Ver y Atender"
-              class="ml-4 p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
-            >
-              <lucide-icon [img]="Eye" [size]="20" />
-            </button>
+            <div class="ml-4 pl-4 border-l border-slate-100 flex items-center">
+              <button
+                (click)="attend.emit(proc)"
+                class="flex items-center gap-2 px-3 py-2 text-sm bg-white border border-slate-300 text-slate-700 hover:text-blue-700 hover:border-blue-300 hover:bg-blue-50 rounded-lg transition-all shadow-sm"
+              >
+                <lucide-icon [img]="Eye" [size]="16" />
+                <span class="hidden md:inline font-medium">Revisar</span>
+              </button>
+            </div>
           </div>
         }
       </div>

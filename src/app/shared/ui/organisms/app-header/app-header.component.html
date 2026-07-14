@@ -1,29 +1,29 @@
-<header class="bg-blue-700 text-white shadow-md sticky top-0 z-10"
+<header class="bg-blue-800 text-white shadow-md sticky top-0 z-10 border-b-4 border-blue-600"
   style="padding-top: env(safe-area-inset-top, 0px)">
-  <div class="max-w-7xl mx-auto h-14 flex items-center justify-between"
+  <div class="max-w-7xl mx-auto h-16 flex items-center justify-between"
     style="padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right))">
     <div class="flex items-center gap-2">
-      <lucide-icon [img]="Scale" [size]="28" />
+      <lucide-icon [img]="Scale" [size]="28" class="text-blue-300" />
       <h1 class="text-xl font-bold tracking-wide">LitigApp</h1>
     </div>
-    <div class="flex items-center gap-4">
-      <div class="relative">
-        <lucide-icon [img]="Bell" [size]="20" />
+    <div class="flex items-center gap-5">
+      <div class="relative cursor-pointer hover:text-blue-200 transition-colors">
+        <lucide-icon [img]="Bell" [size]="22" />
         @if (noveltiesCount() > 0) {
-          <span
-            class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold"
-          >{{ noveltiesCount() }}</span>
+          <span class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold ring-2 ring-blue-800">
+            {{ noveltiesCount() }}
+          </span>
         }
       </div>
-      <button
-        (click)="logout.emit()"
-        title="Cerrar sesión"
-        class="flex items-center gap-1.5 text-sm text-blue-100 hover:text-white transition-colors"
-      >
-        <lucide-icon [img]="LogOut" [size]="18" />
-      </button>
-      <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center border-2 border-white font-bold">
-        U
+      <div class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity" (click)="logout.emit()">
+        <div class="hidden md:block text-right">
+          @if (userName()) {
+            <p class="text-xs font-semibold leading-tight">{{ userName() }}</p>
+          }
+        </div>
+        <div class="w-8 h-8 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center font-bold border border-blue-300 shadow-sm text-sm">
+          {{ userInitials() }}
+        </div>
       </div>
     </div>
   </div>

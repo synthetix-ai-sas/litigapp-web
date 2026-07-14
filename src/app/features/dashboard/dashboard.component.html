@@ -75,7 +75,8 @@
         [loading]="detailLoading()"
         [actionPending]="actionPending()"
         (close)="closeModal()"
-        (markAttended)="markAttended()" />
+        (markAttended)="markAttended()"
+        (downloadPdf)="downloadPdf()" />
     }
     @if (modalType() === 'options') {
       <app-options-modal

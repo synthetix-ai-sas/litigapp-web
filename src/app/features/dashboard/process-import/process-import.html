@@ -10,42 +10,67 @@
 
   <!-- STEP: Upload -->
   @if (step() === 'upload') {
-    <div class="space-y-5">
-      <p class="text-sm text-slate-600">Sube tu archivo Excel con los radicados a importar. Solo se aceptan archivos <strong>.xlsx</strong>.</p>
+    <div class="space-y-4">
+
+      <!-- Dropzone -->
       <label
-        class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-xl cursor-pointer transition-colors"
-        [class.border-blue-400]="dragOver()"
-        [class.bg-blue-50]="dragOver()"
-        [class.border-slate-300]="!dragOver()"
-        [class.bg-slate-50]="!dragOver()"
+        class="flex flex-col items-center justify-center w-full py-8 px-6 border-2 border-dashed rounded-2xl cursor-pointer transition-colors text-center"
+        [class.border-blue-400]="dragOver() || !!selectedFile()"
+        [class.bg-blue-50]="dragOver() || !!selectedFile()"
+        [class.border-slate-300]="!dragOver() && !selectedFile()"
+        [class.bg-slate-50]="!dragOver() && !selectedFile()"
         (dragover)="onDragOver($event)"
         (dragleave)="onDragLeave()"
         (drop)="onDrop($event)"
       >
-        <lucide-icon [img]="FileSpreadsheet" [size]="40" class="text-slate-400 mb-2" />
+        <!-- Upload icon in circle -->
+        <div class="w-14 h-14 rounded-full bg-white shadow-sm flex items-center justify-center mb-4 border border-slate-100">
+          <lucide-icon [img]="Upload" [size]="26" class="text-blue-500" />
+        </div>
+
         @if (selectedFile()) {
-          <p class="text-sm font-semibold text-blue-700">{{ selectedFile()!.name }}</p>
-          <p class="text-xs text-slate-400 mt-1">Haz clic para cambiar el archivo</p>
+          <p class="text-base font-bold text-blue-700">{{ selectedFile()!.name }}</p>
+          <p class="text-sm text-slate-400 mt-1">Haz clic para cambiar el archivo</p>
         } @else {
-          <p class="text-sm font-medium text-slate-600">Arrastra el archivo aquí o haz clic</p>
-          <p class="text-xs text-slate-400 mt-1">.xlsx · máx. 2 MB · máx. 5 000 procesos</p>
+          <p class="text-base font-bold text-slate-800 mb-1">Arrastra tu plantilla de Excel aquí</p>
+          <p class="text-sm text-slate-500 mb-4">Solo archivos .xlsx o .csv con radicados válidos.</p>
+          <span class="px-5 py-2 border-2 border-blue-600 text-blue-700 font-semibold rounded-xl text-sm hover:bg-blue-50 transition-colors">
+            Examinar Archivos
+          </span>
         }
-        <input type="file" accept=".xlsx,.xls" class="hidden" (change)="onFileInput($event)" />
+
+        <input type="file" accept=".xlsx,.xls,.csv" class="hidden" (change)="onFileInput($event)" />
       </label>
-      <div class="flex justify-between">
-        <button type="button" (click)="cancelled.emit()" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium transition-colors">
-          Cancelar
-        </button>
-        <button
-          type="button"
-          (click)="upload()"
-          [disabled]="!selectedFile() || uploading()"
-          class="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium rounded-lg transition-colors"
-        >
-          <lucide-icon [img]="Upload" [size]="18" />
-          {{ uploading() ? 'Leyendo archivo…' : 'Continuar' }}
-        </button>
+
+      <!-- Info box -->
+      <div class="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 flex items-start gap-3">
+        <lucide-icon [img]="Info" [size]="18" class="text-blue-500 mt-0.5 shrink-0" />
+        <div>
+          <p class="text-sm font-semibold text-blue-800">¿No tienes el formato correcto?</p>
+          <p class="text-xs text-blue-600 mt-0.5">El sistema solo requiere una columna principal con el radicado de 23 dígitos. Si incluyes más información, se ignorará y reemplazará por la data oficial.</p>
+        </div>
       </div>
+
+      <!-- Footer -->
+      <div class="flex justify-between items-center pt-1">
+        <span></span>
+        @if (selectedFile()) {
+          <button
+            type="button"
+            (click)="upload()"
+            [disabled]="uploading()"
+            class="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold rounded-xl transition-colors text-sm">
+            <lucide-icon [img]="Upload" [size]="16" />
+            {{ uploading() ? 'Leyendo archivo…' : 'Continuar' }}
+          </button>
+        } @else {
+          <button type="button" (click)="cancelled.emit()"
+            class="px-4 py-2 font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors text-sm">
+            Volver
+          </button>
+        }
+      </div>
+
     </div>
   }
 

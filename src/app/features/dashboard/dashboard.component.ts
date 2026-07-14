@@ -79,6 +79,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     courtName: '',
     fileNumber: '',
     subjectName: '',
+    currentStatus: '',
+    actionDate: '',
   });
 
   // modals

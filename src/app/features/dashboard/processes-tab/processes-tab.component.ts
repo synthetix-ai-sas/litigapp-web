@@ -8,6 +8,7 @@ import {
   ChevronRight,
   Clock,
   FileText,
+  History,
   LucideAngularModule,
   Plus,
   Search,
@@ -45,6 +46,7 @@ export default class ProcessesTabComponent {
   protected readonly ChevronRight = ChevronRight;
   protected readonly Clock = Clock;
   protected readonly FileText = FileText;
+  protected readonly History = History;
   protected readonly Plus = Plus;
   protected readonly Search = Search;
   protected readonly Upload = Upload;
