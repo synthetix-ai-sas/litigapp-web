@@ -1030,7 +1030,6 @@ Algunos procesos son **privados**. El overview los devuelve con `esPrivado: true
 - **Backend** (creación individual y `BulkImportJob` comparten `ProcessCreationService`, así que se arregla en un solo lugar): si `esPrivado`, persistir solo overview, `is_private=true`, **sin subjects/actions**, `sync_status='ok'`, `sync_phase='idle'`. NUNCA parsear `sujetosProcesales` a `process_subjects` — el placeholder no es un sujeto y produce el `null value in column "subject_type"` que rompía el import.
 - **Sync engine**: `OverviewSweepJob` puede refrescar el overview de privados, pero **nunca** encola `ActionsSweepJob` para ellos (darían 404). Con `fechaUltimaActuacion` null y sin actuaciones, quedan `idle` permanentemente. (Si algún día `esPrivado` pasara a false, se trata como cambio normal.)
 - **UI**: mostrar un **tag "Privado"** en listados y en el detalle. En el detalle, en vez de sujetos/actuaciones, un mensaje: *"Proceso privado — la Rama Judicial no permite consultar sujetos ni actuaciones."* `canDownloadPdf = false` (igual que en 'partial'). El DTO de proceso incluye `isPrivate: true`.
-  - ⚠️ **Gap confirmado (2026-07-10)**: `isPrivate` solo existe hoy en `ProcessDetailDto` (`GetByIdAsync`). `ProcessListItemDto` (usado por `ListProcesses`/`ListNovelties`) **NO** lo expone todavía — verificado contra el código real de `litigapp-backend` (`ProcessReader.cs`, `PaginateAsync`). El frontend ya trae el tipo `isPrivate?: boolean` opcional en `ProcessListItem` y renderiza el badge condicionalmente, así que en cuanto el backend agregue el campo al DTO de lista, el badge aparece sin cambios de frontend. Hasta entonces, el tag "Privado" solo se ve en los diálogos de detalle (`attend-modal`, `options-modal`), no en las filas de Novedades/Procesos.
 
 **Respuesta exitosa (201)** — sin envelope, el DTO directo:
 ```json
@@ -1565,6 +1564,21 @@ export const routes: Routes = [
 - **Comunicación con backend**: servicios en `data-access/` con métodos que retornan `Observable<T>` (RxJS sigue siendo el contrato natural de `HttpClient`).
 - **Cacheo**: signals dentro del servicio + `tap()` para guardar la última respuesta.
 - **Mutaciones optimistas**: en "Marcar como atendido", actualizar signal local antes de la respuesta, rollback si falla.
+
+### 7.2.1 Estrategia de refresco / polling (anti-agresivo)
+
+**Regla general: NADA de polling de fondo a intervalos cortos.** Los datos del backend cambian a lo sumo cada ~15 min (cadencia del `OverviewSweepJob`); pollear cada pocos segundos es puro desperdicio y no escala (100 usuarios × 1 req/3s = ~33 req/s solo por la campanita).
+
+**Contador de novedades (campanita del header):**
+- Fuente de la verdad de "hay novedades": el **email** que dispara el sync. El contador in-app es una comodidad, no el mecanismo principal.
+- Refrescar el contador **por eventos, no por timer agresivo**:
+  1. Al **cargar el dashboard** (una vez).
+  2. Al **volver a la pestaña** (`visibilitychange` → `visible`) — cubre el caso "leí el email y vuelvo a la app".
+  3. Poll de respaldo **solo si la pestaña está visible**, cada **5 min (300s)** — alineado a que el sync corre cada 15 min. El refresco por foco (punto 2) es el mecanismo principal; este es solo una red de seguridad para quien deja el dashboard abierto. **Pausar** cuando la pestaña esté oculta. (Es válido incluso **omitirlo** y confiar solo en carga + foco + email.)
+- La campanita debe ser **accionable**: al hacer clic, navegar a la pestaña Novedades y **recargar la lista** (hoy solo muestra un número, es un callejón sin salida). Ver un número sin poder actuar no aporta.
+- Endpoint: reusar `GET /processes/novelties?page=1&pageSize=1` (el `total` da el conteo) o, opcional, un `GET /processes/novelties/count` liviano.
+
+Mismo principio para `GET /imports/active` (§9): polling solo durante un import activo, auto-detenido, cero en idle.
 
 ### 7.3 Composición de componentes (página Novedades)
 

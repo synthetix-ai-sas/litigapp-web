@@ -7,14 +7,18 @@
       <h1 class="text-xl font-bold tracking-wide">LitigApp</h1>
     </div>
     <div class="flex items-center gap-4">
-      <div class="relative">
+      <button
+        (click)="bellClick.emit()"
+        title="Ver novedades"
+        class="relative p-1 -m-1 text-blue-100 hover:text-white transition-colors"
+      >
         <lucide-icon [img]="Bell" [size]="20" />
         @if (noveltiesCount() > 0) {
           <span
             class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold"
           >{{ noveltiesCount() }}</span>
         }
-      </div>
+      </button>
       <button
         (click)="logout.emit()"
         title="Cerrar sesión"
