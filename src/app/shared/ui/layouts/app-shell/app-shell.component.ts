@@ -20,15 +20,22 @@ export class AppShellComponent implements OnInit, OnDestroy {
   protected readonly userName = this.auth.userName;
 
   ngOnInit(): void {
-    this.noveltiesCount.startPolling();
+    this.noveltiesCount.start();
   }
 
   ngOnDestroy(): void {
-    this.noveltiesCount.stopPolling();
+    this.noveltiesCount.stop();
   }
 
   protected logout(): void {
     this.auth.logout();
     this.router.navigate(['/login']);
+  }
+
+  protected async onBellClick(): Promise<void> {
+    // Navigate first so DashboardComponent exists (and captures its baseline)
+    // before we bump the ping signal it reacts to.
+    await this.router.navigate(['/']);
+    this.noveltiesCount.requestNoveltiesView();
   }
 }

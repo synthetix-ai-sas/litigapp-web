@@ -6,15 +6,26 @@
       <lucide-icon [img]="Scale" [size]="28" class="text-blue-300" />
       <h1 class="text-xl font-bold tracking-wide">LitigApp</h1>
     </div>
-    <div class="flex items-center gap-5">
-      <div class="relative cursor-pointer hover:text-blue-200 transition-colors">
-        <lucide-icon [img]="Bell" [size]="22" />
+    <div class="flex items-center gap-4">
+      <button
+        (click)="bellClick.emit()"
+        title="Ver novedades"
+        class="relative p-1 -m-1 text-blue-100 hover:text-white transition-colors"
+      >
+        <lucide-icon [img]="Bell" [size]="20" />
         @if (noveltiesCount() > 0) {
           <span class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold ring-2 ring-blue-800">
             {{ noveltiesCount() }}
           </span>
         }
-      </div>
+      </button>
+      <button
+        (click)="logout.emit()"
+        title="Cerrar sesión"
+        class="flex items-center gap-1.5 text-sm text-blue-100 hover:text-white transition-colors"
+      >
+        <lucide-icon [img]="LogOut" [size]="18" />
+      </button>
       <div class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity" (click)="logout.emit()">
         <div class="hidden md:block text-right">
           @if (userName()) {

@@ -5,6 +5,7 @@ import {
   OnDestroy,
   OnInit,
   computed,
+  effect,
   inject,
   signal,
 } from '@angular/core';
@@ -15,6 +16,7 @@ import { Bell, FileText, LucideAngularModule, Plus } from 'lucide-angular';
 import { debounceTime } from 'rxjs';
 
 import { ImportProgressService } from '../../core/import-progress/import-progress.service';
+import { NoveltiesCountService } from '../../core/novelties/novelties-count.service';
 import { ProcessesService } from '../../data-access/processes.service';
 import { ProcessDetail, ProcessListItem } from '../../shared/domain/process';
 import { AddModalComponent } from './add-modal/add-modal.component';
@@ -53,6 +55,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly importProgress = inject(ImportProgressService);
+  private readonly noveltiesCount = inject(NoveltiesCountService);
 
   // icons
   protected readonly Bell = Bell;
@@ -99,6 +102,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // partial sync polling (detail dialog)
   private syncPollingTimer?: ReturnType<typeof setInterval>;
+
+  // Baseline captured at construction so the effect below ignores the initial run
+  // and only reacts to real bell clicks (viewRequested pings) after that.
+  private lastViewRequest = this.noveltiesCount.viewRequested();
+
+  constructor() {
+    effect(() => {
+      const req = this.noveltiesCount.viewRequested();
+      if (req !== this.lastViewRequest) {
+        this.lastViewRequest = req;
+        this.activeTab.set('novelties');
+        this.loadNovelties();
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.loadNovelties();

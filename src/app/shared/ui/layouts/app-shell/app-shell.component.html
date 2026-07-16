@@ -1,5 +1,5 @@
 <div class="min-h-screen flex flex-col bg-slate-50 text-slate-800">
-  <app-header [noveltiesCount]="count()" [userInitials]="userInitials()" [userName]="userName()" (logout)="logout()" />
+  <app-header [noveltiesCount]="count()" [userInitials]="userInitials()" [userName]="userName()" (logout)="logout()" (bellClick)="onBellClick()" />
   <main class="flex-1">
     <router-outlet />
   </main>
