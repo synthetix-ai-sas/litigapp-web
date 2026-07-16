@@ -15,5 +15,6 @@ export interface Specialty {
 
 export interface CourtItem {
   id: string;
+  officialCode: string;
   name: string;
 }
