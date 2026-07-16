@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { FileSpreadsheet, LucideAngularModule, TriangleAlert, Upload } from 'lucide-angular';
+import { FileSpreadsheet, Info, LucideAngularModule, TriangleAlert, Upload } from 'lucide-angular';
 
 import { ImportProgressService } from '../../../core/import-progress/import-progress.service';
 import { ImportsService } from '../../../data-access/imports.service';
@@ -27,6 +27,7 @@ export class ProcessImport {
 
   protected readonly Upload = Upload;
   protected readonly FileSpreadsheet = FileSpreadsheet;
+  protected readonly Info = Info;
   protected readonly TriangleAlert = TriangleAlert;
 
   private readonly imports = inject(ImportsService);

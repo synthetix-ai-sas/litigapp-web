@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { Bell, CheckCircle, Clock, Eye, LucideAngularModule } from 'lucide-angular';
+import { Bell, CheckCircle, Clock, Eye, Info, Lock, LucideAngularModule } from 'lucide-angular';
 import { ProcessListItem } from '../../../shared/domain/process';
 import { formatDate } from '../../../shared/util/format-date';
 
@@ -20,6 +20,8 @@ export default class NoveltiesTabComponent {
   protected readonly CheckCircle = CheckCircle;
   protected readonly Clock = Clock;
   protected readonly Eye = Eye;
+  protected readonly Info = Info;
+  protected readonly Lock = Lock;
 
   protected formatDate = formatDate;
 }

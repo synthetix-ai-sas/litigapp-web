@@ -1,60 +1,43 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   EventEmitter,
   OnInit,
   Output,
+  computed,
   inject,
   signal,
 } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import {
-  Building,
-  ChevronLeft,
-  ChevronRight,
-  Hash,
-  LucideAngularModule,
-  MapPin,
-  Scale,
-  TriangleAlert,
-} from 'lucide-angular';
+import { Building, LucideAngularModule, TriangleAlert } from 'lucide-angular';
 
 import { CatalogService } from '../../../data-access/catalog.service';
 import { ProcessesService } from '../../../data-access/processes.service';
 import { City, CourtItem, Department, Specialty } from '../../../shared/domain/catalog';
 
-type WizardStep = 1 | 2 | 3 | 4;
-
 @Component({
   selector: 'app-wizard',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, LucideAngularModule],
+  imports: [LucideAngularModule],
   templateUrl: './wizard.html',
 })
 export class Wizard implements OnInit {
   @Output() created = new EventEmitter<void>();
   @Output() cancelled = new EventEmitter<void>();
 
-  protected readonly ChevronLeft = ChevronLeft;
-  protected readonly ChevronRight = ChevronRight;
   protected readonly Building = Building;
-  protected readonly MapPin = MapPin;
-  protected readonly Scale = Scale;
-  protected readonly Hash = Hash;
   protected readonly TriangleAlert = TriangleAlert;
 
   private readonly catalog = inject(CatalogService);
   private readonly processes = inject(ProcessesService);
-  private readonly fb = inject(FormBuilder);
-  private readonly destroyRef = inject(DestroyRef);
 
-  protected readonly step = signal<WizardStep>(1);
   protected readonly departments = signal<Department[]>([]);
   protected readonly cities = signal<City[]>([]);
   protected readonly courts = signal<CourtItem[]>([]);
   protected readonly specialties = signal<Specialty[]>([]);
-  protected readonly loading = signal(false);
+
+  protected readonly deptLoading = signal(false);
+  protected readonly cityLoading = signal(false);
+  protected readonly courtLoading = signal(false);
   protected readonly submitting = signal(false);
   protected readonly error = signal<string | null>(null);
 
@@ -62,62 +45,75 @@ export class Wizard implements OnInit {
   protected readonly selectedCityId = signal('');
   protected readonly selectedCourtId = signal('');
   protected readonly selectedSpecialtyId = signal('');
+  protected readonly lastDigits = signal('');
 
-  protected readonly step4Form = this.fb.nonNullable.group({
-    filingYear: [
-      new Date().getFullYear(),
-      [Validators.required, Validators.min(1990), Validators.max(new Date().getFullYear())],
-    ],
-    consecutive: ['', [Validators.required, Validators.pattern(/^\d{1,11}$/)]],
-    alias: '',
+  protected readonly builtRadicado = computed(() => {
+    const digits = this.lastDigits().replace(/\D/g, '');
+    const filled = digits.padEnd(10, '-');
+    const prefix = '—————————————';
+    return prefix + filled;
   });
 
+  protected readonly canSubmit = computed(
+    () =>
+      !!this.selectedDeptId() &&
+      !!this.selectedCityId() &&
+      !!this.selectedCourtId() &&
+      this.lastDigits().replace(/\D/g, '').length >= 4,
+  );
+
   ngOnInit(): void {
-    this.loading.set(true);
+    this.deptLoading.set(true);
     this.catalog.listDepartments().subscribe({
       next: (depts) => {
         this.departments.set(depts);
-        this.loading.set(false);
+        this.deptLoading.set(false);
       },
       error: () => {
-        this.error.set('Error al cargar los departamentos. Por favor intenta de nuevo.');
-        this.loading.set(false);
+        this.error.set('Error al cargar los departamentos.');
+        this.deptLoading.set(false);
       },
     });
   }
 
-  protected goToStep2(): void {
-    if (!this.selectedDeptId()) return;
-    this.step.set(2);
-    this.cities.set([]);
+  protected onDeptChange(deptId: string): void {
+    this.selectedDeptId.set(deptId);
     this.selectedCityId.set('');
-    this.loading.set(true);
-    this.catalog.listCities(this.selectedDeptId()).subscribe({
+    this.selectedCourtId.set('');
+    this.selectedSpecialtyId.set('');
+    this.cities.set([]);
+    this.courts.set([]);
+    this.specialties.set([]);
+    if (!deptId) return;
+    this.cityLoading.set(true);
+    this.catalog.listCities(deptId).subscribe({
       next: (cities) => {
         this.cities.set(cities);
-        this.loading.set(false);
+        this.cityLoading.set(false);
       },
       error: () => {
         this.error.set('Error al cargar las ciudades.');
-        this.loading.set(false);
+        this.cityLoading.set(false);
       },
     });
   }
 
-  protected goToStep3(): void {
-    if (!this.selectedCityId()) return;
-    this.step.set(3);
-    this.courts.set([]);
+  protected onCityChange(cityId: string): void {
+    this.selectedCityId.set(cityId);
     this.selectedCourtId.set('');
-    this.loading.set(true);
-    this.catalog.listCourts(this.selectedCityId()).subscribe({
+    this.selectedSpecialtyId.set('');
+    this.courts.set([]);
+    this.specialties.set([]);
+    if (!cityId) return;
+    this.courtLoading.set(true);
+    this.catalog.listCourts(cityId).subscribe({
       next: (courts) => {
         this.courts.set(courts);
-        this.loading.set(false);
+        this.courtLoading.set(false);
       },
       error: () => {
         this.error.set('Error al cargar los despachos.');
-        this.loading.set(false);
+        this.courtLoading.set(false);
       },
     });
     this.catalog.listSpecialties().subscribe({
@@ -126,45 +122,29 @@ export class Wizard implements OnInit {
     });
   }
 
-  protected filterCourts(): void {
-    if (!this.selectedCityId()) return;
-    this.courts.set([]);
+  protected onSpecialtyChange(specialtyId: string): void {
+    this.selectedSpecialtyId.set(specialtyId);
     this.selectedCourtId.set('');
-    this.loading.set(true);
-    this.catalog
-      .listCourts(this.selectedCityId(), this.selectedSpecialtyId() || undefined)
-      .subscribe({
-        next: (courts) => {
-          this.courts.set(courts);
-          this.loading.set(false);
-        },
-        error: () => {
-          this.error.set('Error al cargar los despachos.');
-          this.loading.set(false);
-        },
-      });
-  }
-
-  protected goToStep4(): void {
-    if (!this.selectedCourtId()) return;
-    this.step.set(4);
-  }
-
-  protected back(): void {
-    const s = this.step();
-    if (s > 1) {
-      this.step.set((s - 1) as WizardStep);
-    } else {
-      this.cancelled.emit();
-    }
+    this.courts.set([]);
+    if (!this.selectedCityId()) return;
+    this.courtLoading.set(true);
+    this.catalog.listCourts(this.selectedCityId(), specialtyId || undefined).subscribe({
+      next: (courts) => {
+        this.courts.set(courts);
+        this.courtLoading.set(false);
+      },
+      error: () => {
+        this.error.set('Error al cargar los despachos.');
+        this.courtLoading.set(false);
+      },
+    });
   }
 
   protected submit(): void {
-    if (this.step4Form.invalid || this.submitting()) {
-      this.step4Form.markAllAsTouched();
-      return;
-    }
-    const { filingYear, consecutive, alias } = this.step4Form.getRawValue();
+    if (!this.canSubmit() || this.submitting()) return;
+    const digits = this.lastDigits().replace(/\D/g, '');
+    const filingYear = parseInt(digits.slice(0, 4), 10);
+    const consecutive = digits.slice(4);
     this.submitting.set(true);
     this.error.set(null);
     this.processes
@@ -173,7 +153,6 @@ export class Wizard implements OnInit {
         courtId: this.selectedCourtId(),
         filingYear,
         consecutive,
-        alias: alias || undefined,
       })
       .subscribe({
         next: () => {
