@@ -68,11 +68,20 @@
           @if (job.errorCount > 0) {
             <button
               (click)="downloadErrors()"
-              class="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100 font-medium rounded-lg transition-colors text-sm"
+              [disabled]="downloadingErrors()"
+              class="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100 disabled:opacity-60 disabled:cursor-not-allowed font-medium rounded-lg transition-colors text-sm"
             >
-              <lucide-icon [img]="Download" [size]="16" />
-              Descargar CSV de errores
+              @if (downloadingErrors()) {
+                <lucide-icon [img]="LoaderCircle" [size]="16" class="animate-spin" />
+                Descargando…
+              } @else {
+                <lucide-icon [img]="Download" [size]="16" />
+                Descargar CSV de errores
+              }
             </button>
+            @if (downloadError()) {
+              <p class="text-xs text-red-600 text-center -mt-1">{{ downloadError() }}</p>
+            }
           }
           <button
             (click)="goToProcesses()"
