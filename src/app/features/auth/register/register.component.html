@@ -32,14 +32,14 @@
           </label>
           <div class="relative">
             <lucide-angular name="user" [size]="16" [strokeWidth]="1.5"
-              class="absolute left-5 top-1/2 -translate-y-1/2 text-text-disabled pointer-events-none" />
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-text-disabled pointer-events-none" />
             <input
               id="fullName"
               type="text"
               formControlName="fullName"
               autocomplete="name"
               placeholder="Carlos Rodríguez"
-              class="w-full pl-12 pr-3 py-2.5 border rounded-lg text-sm transition-colors
+              class="w-full pl-10 pr-3 py-2.5 border rounded-lg text-sm transition-colors
                      placeholder:text-text-disabled outline-none
                      focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               [class.border-red-300]="fieldInvalid('fullName')"
@@ -58,14 +58,14 @@
           </label>
           <div class="relative">
             <lucide-angular name="mail" [size]="16" [strokeWidth]="1.5"
-              class="absolute left-5 top-1/2 -translate-y-1/2 text-text-disabled pointer-events-none" />
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-text-disabled pointer-events-none" />
             <input
               id="email"
               type="email"
               formControlName="email"
               autocomplete="email"
               placeholder="tu@email.com"
-              class="w-full pl-12 pr-3 py-2.5 border rounded-lg text-sm transition-colors
+              class="w-full pl-10 pr-3 py-2.5 border rounded-lg text-sm transition-colors
                      placeholder:text-text-disabled outline-none
                      focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               [class.border-red-300]="fieldInvalid('email')"
@@ -84,14 +84,14 @@
           </label>
           <div class="relative">
             <lucide-angular name="lock" [size]="16" [strokeWidth]="1.5"
-              class="absolute left-5 top-1/2 -translate-y-1/2 text-text-disabled pointer-events-none" />
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-text-disabled pointer-events-none" />
             <input
               id="password"
               [type]="showPassword() ? 'text' : 'password'"
               formControlName="password"
               autocomplete="new-password"
               placeholder="Mínimo 8 caracteres"
-              class="w-full pl-12 pr-10 py-2.5 border rounded-lg text-sm transition-colors
+              class="w-full pl-10 pr-10 py-2.5 border rounded-lg text-sm transition-colors
                      placeholder:text-text-disabled outline-none
                      focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               [class.border-red-300]="fieldInvalid('password')"
@@ -121,14 +121,14 @@
           </label>
           <div class="relative">
             <lucide-angular name="lock" [size]="16" [strokeWidth]="1.5"
-              class="absolute left-5 top-1/2 -translate-y-1/2 text-text-disabled pointer-events-none" />
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-text-disabled pointer-events-none" />
             <input
               id="confirmPassword"
               [type]="showPassword() ? 'text' : 'password'"
               formControlName="confirmPassword"
               autocomplete="new-password"
               placeholder="Repite tu contraseña"
-              class="w-full pl-12 pr-3 py-2.5 border rounded-lg text-sm transition-colors
+              class="w-full pl-10 pr-3 py-2.5 border rounded-lg text-sm transition-colors
                      placeholder:text-text-disabled outline-none
                      focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               [class.border-red-300]="mismatchError"
