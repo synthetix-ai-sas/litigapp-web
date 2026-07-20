@@ -47,10 +47,14 @@ export class Wizard implements OnInit {
   protected readonly selectedSpecialtyId = signal('');
   protected readonly lastDigits = signal('');
 
+  protected readonly selectedCourt = computed(() =>
+    this.courts().find((c) => c.id === this.selectedCourtId()),
+  );
+
   protected readonly builtRadicado = computed(() => {
     const digits = this.lastDigits().replace(/\D/g, '');
     const filled = digits.padEnd(10, '-');
-    const prefix = '—————————————';
+    const prefix = this.selectedCourt()?.officialCode?.slice(0, 13) ?? '─────────────';
     return prefix + filled;
   });
 
