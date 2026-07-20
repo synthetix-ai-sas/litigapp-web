@@ -24,8 +24,8 @@ export interface RefreshRequest {
 }
 
 export interface ConfirmPasswordResetRequest {
-  email: string;
-  resetToken: string;
+  uid: string;
+  token: string;
   newPassword: string;
 }
 

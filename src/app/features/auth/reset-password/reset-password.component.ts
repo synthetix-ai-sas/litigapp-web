@@ -19,7 +19,7 @@ const passwordsMatch: ValidatorFn = (group: AbstractControl): ValidationErrors |
   return pw && confirm && pw !== confirm ? { passwordsMismatch: true } : null;
 };
 
-type PageState = 'form' | 'success' | 'invalid-link';
+type PageState = 'form' | 'invalid-link';
 
 @Component({
   selector: 'app-reset-password',
@@ -39,7 +39,7 @@ export default class ResetPasswordComponent implements OnInit {
   showPassword = signal(false);
   state = signal<PageState>('form');
 
-  email = '';
+  private uid = '';
   private token = '';
 
   form = this.fb.group(
@@ -53,9 +53,9 @@ export default class ResetPasswordComponent implements OnInit {
   ngOnInit(): void {
     const params = this.route.snapshot.queryParamMap;
     this.token = params.get('token') ?? '';
-    this.email = params.get('email') ?? '';
+    this.uid = params.get('uid') ?? '';
 
-    if (!this.token || !this.email) {
+    if (!this.token || !this.uid) {
       this.state.set('invalid-link');
     }
   }
@@ -67,10 +67,7 @@ export default class ResetPasswordComponent implements OnInit {
 
   get mismatchError(): boolean {
     const ctrl = this.form.get('confirmPassword');
-    return !!(
-      ctrl?.touched &&
-      (ctrl.invalid || this.form.hasError('passwordsMismatch'))
-    );
+    return !!(ctrl?.touched && (ctrl.invalid || this.form.hasError('passwordsMismatch')));
   }
 
   async onSubmit(): Promise<void> {
@@ -83,13 +80,12 @@ export default class ResetPasswordComponent implements OnInit {
     try {
       await firstValueFrom(
         this.authData.confirmPasswordReset({
-          resetToken: this.token,
-          email: this.email,
+          uid: this.uid,
+          token: this.token,
           newPassword: this.form.value.password!,
         }),
       );
-
-      this.state.set('success');
+      await this.router.navigate(['/login'], { queryParams: { reset: 'success' } });
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 400) {
         this.state.set('invalid-link');

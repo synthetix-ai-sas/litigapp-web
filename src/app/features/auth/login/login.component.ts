@@ -1,11 +1,11 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import {
   FormBuilder,
   ReactiveFormsModule,
   Validators,
   AbstractControl,
 } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../../core/auth/auth.service';
 
@@ -16,14 +16,16 @@ import { AuthService } from '../../../core/auth/auth.service';
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })
-export default class LoginComponent {
+export default class LoginComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   loading = signal(false);
   error = signal<string | null>(null);
   showPassword = signal(false);
+  passwordResetSuccess = signal(false);
 
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -44,6 +46,14 @@ export default class LoginComponent {
 
   get passwordInvalid(): boolean {
     return this.passwordCtrl.invalid && this.passwordCtrl.touched;
+  }
+
+  ngOnInit(): void {
+    if (this.route.snapshot.queryParamMap.get('reset') === 'success') {
+      this.passwordResetSuccess.set(true);
+      // Clean the query param from the URL without navigation side-effects
+      void this.router.navigate([], { replaceUrl: true, queryParams: {} });
+    }
   }
 
   async onSubmit(): Promise<void> {
