@@ -33,15 +33,13 @@ export const routes: Routes = [
     children: [
       {
         path: 'terminos',
-        data: { title: 'Términos y Condiciones', file: 'terminos.v1.0.md' },
         loadComponent: () =>
-          import('./features/legal/legal-page/legal-page.component'),
+          import('./features/legal/terms/terms.component'),
       },
       {
         path: 'privacidad',
-        data: { title: 'Política de Tratamiento de Datos Personales', file: 'privacidad.v1.0.md' },
         loadComponent: () =>
-          import('./features/legal/legal-page/legal-page.component'),
+          import('./features/legal/privacy-policy/privacy-policy.component'),
       },
     ],
   },

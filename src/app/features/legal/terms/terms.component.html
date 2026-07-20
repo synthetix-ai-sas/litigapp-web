@@ -1,0 +1,126 @@
+<div class="min-h-screen flex flex-col bg-background">
+
+  <!-- Header -->
+  <header class="bg-primary-700 text-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center gap-3">
+      <lucide-angular name="scale" [size]="24" [strokeWidth]="2" />
+      <span class="text-xl font-bold tracking-wide">LitigApp</span>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="flex-1 w-full max-w-3xl mx-auto px-4 py-8">
+
+    <!-- Back link -->
+    <a routerLink="/"
+       class="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-text-secondary transition-colors mb-6">
+      <lucide-angular name="arrow-left" [size]="15" [strokeWidth]="2" />
+      Volver a LitigApp
+    </a>
+
+    <article class="bg-surface rounded-xl border border-border shadow-sm p-8 legal-content">
+
+      <h1>Términos y Condiciones</h1>
+      <p><strong>Versión 1.0 — Borrador pendiente de aprobación legal</strong></p>
+
+      <blockquote>
+        ⚠️ Este texto es un borrador provisional. El contenido final requiere revisión y
+        aprobación por parte del abogado asesor antes de entrar en vigor. No constituye
+        un documento legal vigente.
+      </blockquote>
+
+      <h2>1. Objeto y Aceptación</h2>
+      <p>
+        LitigApp (en adelante "la Plataforma") es un servicio de software (SaaS) operado
+        por [NOMBRE EMPRESA], con domicilio en Colombia, destinado a abogados litigantes
+        para el monitoreo automatizado de procesos judiciales.
+      </p>
+      <p>
+        Al crear una cuenta y utilizar la Plataforma, el usuario ("Abogado Usuario")
+        acepta íntegramente estos Términos y Condiciones. Si no está de acuerdo con
+        alguno de sus términos, no debe utilizar la Plataforma.
+      </p>
+
+      <h2>2. Condiciones de Uso</h2>
+      <ul>
+        <li>El servicio está dirigido exclusivamente a profesionales del derecho con tarjeta profesional vigente.</li>
+        <li>El Abogado Usuario es responsable de mantener la confidencialidad de sus credenciales de acceso.</li>
+        <li>Está prohibido compartir accesos con terceros no autorizados.</li>
+        <li>El Abogado Usuario se compromete a utilizar la Plataforma conforme a la ley colombiana y a las presentes condiciones.</li>
+      </ul>
+
+      <h2>3. Descripción del Servicio</h2>
+      <p>
+        La Plataforma consulta la API pública de la Rama Judicial de Colombia para
+        obtener información sobre el estado de procesos judiciales y notificar al
+        Abogado Usuario por correo electrónico cuando se detecta una novedad. El
+        servicio es informativo y complementario; no reemplaza la consulta directa de
+        los expedientes ni constituye asesoría jurídica.
+      </p>
+
+      <h2>4. Datos de Terceros</h2>
+      <p>
+        El Abogado Usuario declara y garantiza que cuenta con la autorización necesaria
+        para cargar en la Plataforma datos de sus clientes, contrapartes y demás personas
+        relacionadas con los procesos judiciales que registre. LitigApp actúa como
+        Encargado del tratamiento de dichos datos; el Abogado Usuario es el Responsable
+        del tratamiento en los términos de la Ley 1581 de 2012.
+      </p>
+
+      <h2>5. Propiedad Intelectual</h2>
+      <p>
+        La Plataforma, su código fuente, diseño, marcas y contenidos son propiedad de
+        [NOMBRE EMPRESA]. El Abogado Usuario obtiene una licencia de uso personal, no
+        exclusiva e intransferible, limitada al uso de la Plataforma conforme a estos
+        Términos.
+      </p>
+
+      <h2>6. Limitación de Responsabilidad</h2>
+      <p>
+        La información de procesos judiciales proviene de fuentes públicas. LitigApp
+        no garantiza la exactitud, completitud, oportunidad ni disponibilidad de dicha
+        información, dada la dependencia de sistemas externos. La Plataforma no es
+        responsable por decisiones tomadas con base en la información mostrada.
+      </p>
+
+      <h2>7. Vigencia y Terminación</h2>
+      <p>
+        El servicio es de carácter indefinido. Cualquiera de las partes puede terminar
+        la relación con previo aviso de 30 días calendario. LitigApp puede suspender o
+        terminar cuentas que incumplan estos Términos de forma inmediata y sin previo
+        aviso cuando la infracción sea grave.
+      </p>
+
+      <h2>8. Modificaciones</h2>
+      <p>
+        LitigApp podrá modificar estos Términos en cualquier momento, notificando al
+        Abogado Usuario con al menos 15 días de anticipación por correo electrónico.
+        El uso continuado de la Plataforma tras la notificación implica aceptación de
+        las modificaciones.
+      </p>
+
+      <h2>9. Ley Aplicable y Jurisdicción</h2>
+      <p>
+        Este acuerdo se rige por las leyes de la República de Colombia. Cualquier
+        controversia que no pueda resolverse amigablemente se someterá a los jueces
+        competentes de la ciudad de [CIUDAD].
+      </p>
+
+      <hr>
+
+      <p>
+        <em>Para consultas sobre estos Términos: [CORREO DE CONTACTO]</em><br>
+        <em>Versión 1.0 — Fecha de publicación: [FECHA]</em>
+      </p>
+
+    </article>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-border py-5 mt-6">
+    <p class="text-center text-xs text-text-muted">
+      &copy; {{ currentYear }} LitigApp &middot; Todos los derechos reservados
+    </p>
+  </footer>
+
+</div>
