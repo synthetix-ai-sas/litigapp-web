@@ -5,7 +5,7 @@ import {
   Validators,
   AbstractControl,
 } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../../core/auth/auth.service';
 
@@ -20,6 +20,7 @@ export default class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   loading = signal(false);
   error = signal<string | null>(null);
@@ -55,7 +56,8 @@ export default class LoginComponent {
 
     try {
       await this.auth.login(this.emailCtrl.value as string, this.passwordCtrl.value as string);
-      await this.router.navigate(['/']);
+      const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/';
+      await this.router.navigateByUrl(returnUrl);
     } catch (e) {
       this.error.set(
         e instanceof Error ? e.message : 'Error al iniciar sesión. Por favor intenta de nuevo.',
