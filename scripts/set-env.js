@@ -1,10 +1,10 @@
-// Genera src/environments/environment.ts a partir de variables de entorno
-// antes del build/serve. En Vercel, configura API_URL en el dashboard del
-// proyecto. En local, si no está seteada, cae al backend de desarrollo.
+// Genera src/environments/environment.ts (no se versiona) antes de start/build/test/lint.
+// - Local: sin API_URL cae al backend local (:5119). Override personal: exporta API_URL.
+// - Vercel/mobile: API_URL en el dashboard, o `API_URL=<prod> pnpm build && npx cap sync`.
 const fs = require('fs');
 const path = require('path');
 
-const apiUrl = process.env.API_URL || 'http://localhost:5000';
+const apiUrl = process.env.API_URL || 'http://localhost:5119';
 const production = process.env.NODE_ENV === 'production' || process.argv.includes('--prod');
 
 const content = `// Archivo autogenerado por scripts/set-env.js — no editar a mano.
