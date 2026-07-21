@@ -48,8 +48,11 @@ ESLint boundary rules enforce that layers don't import upward (see `eslint.confi
 
 ## Environment
 
-- `src/environments/environment.ts` — dev (`apiUrl: http://localhost:5000`)
-- `src/environments/environment.prod.ts` — prod (update `apiUrl` for deployment)
+`src/environments/environment.ts` es **generado** por `scripts/set-env.js` en cada `pnpm start|build|test|lint` — no se versiona ni se edita a mano.
+
+- **Local:** default `http://localhost:5119`. Override personal: `API_URL=http://otro-host:5119 pnpm start`
+- **Prod (Vercel):** `API_URL` en el dashboard del proyecto.
+- **Mobile:** `API_URL=https://<api-prod> pnpm build && npx cap sync`
 
 ## Build Order
 

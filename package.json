@@ -3,12 +3,13 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
+    "postinstall": "node scripts/set-env.js",
     "start": "node scripts/set-env.js && ng serve",
     "build": "node scripts/set-env.js && ng build",
     "set-env": "node scripts/set-env.js",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test --watch=false --browsers ChromeHeadless",
-    "lint": "eslint src",
+    "test": "node scripts/set-env.js && ng test --watch=false --browsers ChromeHeadless",
+    "lint": "node scripts/set-env.js && eslint src",
     "e2e": "playwright test"
   },
   "prettier": {
