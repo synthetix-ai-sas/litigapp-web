@@ -48,31 +48,25 @@
           }
         </div>
 
-        <!-- Error details (first 5) -->
-        @if (job.errors && job.errors.length > 0) {
-          <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-5">
-            <p class="text-xs font-semibold text-amber-800 mb-2">Errores detectados (primeros {{ job.errors.length > 5 ? 5 : job.errors.length }}):</p>
-            <ul class="text-xs text-amber-700 space-y-1">
-              @for (err of job.errors.slice(0, 5); track err.row) {
-                <li>· Fila {{ err.row }}: {{ err.message }}</li>
-              }
-            </ul>
-            @if (job.errors.length > 5) {
-              <p class="text-xs text-amber-600 mt-1">...y {{ job.errors.length - 5 }} más. Descarga el CSV para ver todos.</p>
-            }
-          </div>
-        }
-
         <!-- Actions -->
         <div class="flex flex-col gap-2">
           @if (job.errorCount > 0) {
             <button
               (click)="downloadErrors()"
-              class="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100 font-medium rounded-lg transition-colors text-sm"
+              [disabled]="downloadingErrors()"
+              class="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100 disabled:opacity-60 disabled:cursor-not-allowed font-medium rounded-lg transition-colors text-sm"
             >
-              <lucide-icon [img]="Download" [size]="16" />
-              Descargar CSV de errores
+              @if (downloadingErrors()) {
+                <lucide-icon [img]="LoaderCircle" [size]="16" class="animate-spin" />
+                Descargando…
+              } @else {
+                <lucide-icon [img]="Download" [size]="16" />
+                Descargar CSV de errores
+              }
             </button>
+            @if (downloadError()) {
+              <p class="text-xs text-red-600 text-center -mt-1">{{ downloadError() }}</p>
+            }
           }
           <button
             (click)="goToProcesses()"
