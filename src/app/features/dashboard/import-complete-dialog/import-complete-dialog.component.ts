@@ -1,12 +1,16 @@
-import { ChangeDetectionStrategy, Component, inject, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, output, signal } from '@angular/core';
 import {
   AlertTriangle,
   CheckCircle,
   Download,
+  LoaderCircle,
   LucideAngularModule,
   X,
 } from 'lucide-angular';
 import { ImportProgressService } from '../../../core/import-progress/import-progress.service';
+import { ImportsService } from '../../../data-access/imports.service';
+
+const ERRORS_CSV_FILENAME = 'procesos_con_errores.csv';
 
 @Component({
   selector: 'app-import-complete-dialog',
@@ -20,29 +24,40 @@ export class ImportCompleteDialogComponent {
   readonly dismissed = output<void>();
 
   protected readonly importProgress = inject(ImportProgressService);
+  private readonly imports = inject(ImportsService);
 
   protected readonly CheckCircle = CheckCircle;
   protected readonly AlertTriangle = AlertTriangle;
   protected readonly Download = Download;
+  protected readonly LoaderCircle = LoaderCircle;
   protected readonly X = X;
 
-  /** Errors already come inline on the job (GET /imports/active) — no separate CSV endpoint exists. */
+  protected readonly downloadingErrors = signal(false);
+  protected readonly downloadError = signal<string | null>(null);
+
+  /** Streams the CSV straight from the backend — same builder as the email attachment. */
   protected downloadErrors(): void {
     const job = this.importProgress.completedJob();
-    if (!job || job.errors.length === 0) return;
-    const header = 'Fila,Radicado,Codigo,Error';
-    const rows = job.errors.map(
-      (e) =>
-        `${e.row},"${(e.radicado ?? '').replace(/"/g, '""')}","${(e.code ?? '').replace(/"/g, '""')}","${e.message.replace(/"/g, '""')}"`,
-    );
-    const csv = '﻿' + [header, ...rows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `errores-importacion-${job.id.slice(0, 8)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    if (!job || this.downloadingErrors()) return;
+
+    this.downloadingErrors.set(true);
+    this.downloadError.set(null);
+
+    this.imports.downloadErrorsCsv(job.id).subscribe({
+      next: (blob) => {
+        this.downloadingErrors.set(false);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = ERRORS_CSV_FILENAME;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => {
+        this.downloadingErrors.set(false);
+        this.downloadError.set('No se pudo descargar el archivo. Intenta de nuevo.');
+      },
+    });
   }
 
   protected close(): void {

@@ -82,4 +82,14 @@ export class ImportsService {
       .get<ImportJobWire | null>(`${this.base}/active`)
       .pipe(map((wire) => (wire ? toImportJob(wire) : null)));
   }
+
+  /**
+   * CSV of the rows that failed to import — same builder as the ImportComplete
+   * email attachment, so the file is byte-identical either way (UTF-8 BOM, correct
+   * accents). Goes through HttpClient (not a bare <a href>) so the JWT interceptor
+   * attaches the Bearer token; the caller must save the blob manually.
+   */
+  downloadErrorsCsv(id: string): Observable<Blob> {
+    return this.http.get(`${this.base}/${id}/errors.csv`, { responseType: 'blob' });
+  }
 }
